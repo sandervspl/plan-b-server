@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "module": "commonjs",
+        "target": "es6",
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "baseUrl": "src",
+        "paths": {
+            "config/*": ["config/*"],
+            "controllers/*": ["controllers/*"],
+            "entities/*": ["entities/*"],
+            "helpers/*": ["helpers/*"],
+            "services/*": ["services/*"],
+            "modules/*": ["modules/*"],
+            "database/*": ["Database.ts"],
+            "types/*": ["types/*"]
+        },
+        "lib": ["esnext"]
+    },
+    "exclude": ["node_modules"]
+}

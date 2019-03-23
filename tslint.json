@@ -1,0 +1,81 @@
+{
+  "extends": [
+    "tslint:recommended",
+    "tslint-config-airbnb"
+  ],
+  "rulesDirectory": [
+    "node_modules/tslint-eslint-rules/dist/rules"
+  ],
+  "rules": {
+    "no-var-requires": false,
+    "ordered-imports": false,
+    "object-literal-sort-keys": false,
+    "consistent-return": false,
+    "indent": [true, "spaces"],
+    "ter-arrow-parens": [true, "always"],
+    "ter-indent": [true, 2, { "SwitchCase": 1 }],
+    "no-console": [true, "log", "error"],
+    "no-nested-ternary": false,
+    "no-param-reassign": false,
+    "no-underscore-dangle": false,
+    "object-curly-newline": false,
+    "variable-name": false,
+    "object-shorthand-properties-first": false,
+    "max-line-length": [true, 120],
+    "interface-name": false,
+    "align": false,
+    "import-name": false,
+    "no-angle-bracket-type-assertion": true,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": {
+          "objects": "always",
+          "arrays": "always",
+          "functions": "never",
+          "typeLiterals": "ignore"
+        },
+        "singleline": "never",
+        "esSpecCompliant": true
+      }
+    ],
+    "member-ordering": [
+      true,
+      {
+        "order": [
+          "public-static-field",
+          "public-static-method",
+          "protected-static-field",
+          "protected-static-method",
+          "private-static-field",
+          "private-static-method",
+          "public-instance-field",
+          "protected-instance-field",
+          "private-instance-field",
+          "public-constructor",
+          "protected-constructor",
+          "private-constructor",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method"
+        ]
+      }
+    ],
+    "quotemark": [true, "single", "avoid-escape"],
+    "no-shadowed-variable": false,
+    "semicolon": [true, "always", "ignore-interfaces"],
+    "array-type": [true, "array"],
+    "whitespace": [true, 
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-module",
+      "check-separator",
+      "check-rest-spread",
+      "check-type",
+      "check-typecast",
+      "check-type-operator",
+      "check-preblock"
+    ]
+  }
+}
