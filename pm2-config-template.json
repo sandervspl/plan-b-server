@@ -1,8 +1,8 @@
-
 {
   "apps": [{
     "name": "api.planbguild.eu",
     "script": "/var/api/PROJECT/dist/Server.js",
+    "node_args": "-r ./tsconfig-paths-bootstrap.js",
     "cwd": "/var/api/PROJECT",
     "instances": INSTANCES,
     "env_production": {

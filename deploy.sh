@@ -142,7 +142,7 @@ sed "s/USER/$USER/g; s/PROJECT/$PROJECT-$VERSION/g; s/INSTANCES/$INSTANCES/g"  .
 
 #Build tar and copy to server
 echo -e "🚚 $c Copying files to server $nc"
-tar -czf $FILENAME ./dist ./package.json ./package-lock.json ./$PM2_CONFIG_NAME
+tar -czf $FILENAME ./dist ./package.json ./package-lock.json ./tsconfig-paths-bootstrap.js ./tsconfig.json ./$PM2_CONFIG_NAME
 scp -r ./$FILENAME $ROOT_USER@$HOST:~
 rm ./$FILENAME
 rm ./$PM2_CONFIG_NAME
