@@ -1,9 +1,9 @@
 
 {
   "apps": [{
-    "name": "dev.planbguild.eu",
-    "script": "/var/www/PROJECT/dist/server/index.js",
-    "cwd": "/var/www/PROJECT",
+    "name": "api.planbguild.eu",
+    "script": "/var/api/PROJECT/dist/Server.js",
+    "cwd": "/var/api/PROJECT",
     "instances": INSTANCES,
     "env_production": {
       "NODE_ENV": "production",
