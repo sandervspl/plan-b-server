@@ -9,10 +9,7 @@ export default class BlizzardService {
 
   public async getAccessToken() {
     // Get new access token
-    if (!this.accessToken) {
-      this.accessToken = await this.auth();
-    // Refresh access token
-    } else if (this.accessToken.expired()) {
+    if (!this.accessToken || this.accessToken.expired()) {
       this.accessToken = await this.auth();
     }
 
