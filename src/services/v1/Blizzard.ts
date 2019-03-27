@@ -13,7 +13,7 @@ export default class BlizzardService {
       this.accessToken = await this.auth();
     // Refresh access token
     } else if (this.accessToken.expired()) {
-      this.accessToken = await this.accessToken.refresh();
+      this.accessToken = await this.auth();
     }
 
     return this.accessToken;
