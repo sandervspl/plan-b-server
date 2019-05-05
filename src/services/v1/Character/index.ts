@@ -38,7 +38,7 @@ export default class CharacterService {
   public async single(name: string) {
     const queries = qs.stringify({
       ...this.blizzardService.queries,
-      fields: 'guild,items',
+      fields: 'guild,items,professions',
     });
 
     try {

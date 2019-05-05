@@ -465,6 +465,29 @@ type Items = {
   mainHand: MainHand;
 }
 
+export interface Primary {
+  id: number;
+  name: string;
+  icon: string;
+  rank: number;
+  max: number;
+  recipes: number[];
+}
+
+export interface Secondary {
+  id: number;
+  name: string;
+  icon: string;
+  rank: number;
+  max: number;
+  recipes: number[];
+}
+
+export interface Professions {
+  primary: Primary[];
+  secondary: Secondary[];
+}
+
 export type CharacterData = {
   lastModified: number;
   name: string;
@@ -481,4 +504,5 @@ export type CharacterData = {
   guild: Guild;
   items: Items;
   totalHonorableKills: number;
+  professions: Professions;
 }
