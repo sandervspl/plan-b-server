@@ -10,6 +10,13 @@ import apiconfig from 'config/apiconfig';
 export default class BlizzardService {
   private accessToken: oauth2.AccessToken;
 
+  public get queries() {
+    return {
+      locale: 'en_GB',
+      access_token: this.accessToken.token.access_token as string, // eslint-disable-line @typescript-eslint/camelcase
+    };
+  }
+
   private checkAccessTokenExpired = async (): Promise<boolean> => {
     if (!this.accessToken || !this.accessToken.token) {
       return true;
