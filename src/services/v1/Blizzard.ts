@@ -1,8 +1,8 @@
+import qs from 'querystring';
 import * as i from 'types';
 import { Injectable } from '@nestjs/common';
 import oauth2 from 'simple-oauth2';
 import fetch from 'node-fetch';
-import qs from 'querystring';
 import blizzardConfig from 'config/blizzard';
 import apiconfig from 'config/apiconfig';
 
@@ -20,7 +20,7 @@ export default class BlizzardService {
     });
 
     const response = await fetch(`https://us.battle.net/oauth/check_token?${queries}`);
-    let checkAccessTokenValid: i.CheckTokenResponse = await response.json();
+    const checkAccessTokenValid: i.CheckTokenResponse = await response.json();
 
     const checkAccessTokenErr = checkAccessTokenValid as i.CheckTokenResponseFailed;
     if (checkAccessTokenErr.error) {

@@ -1,5 +1,5 @@
 export type CheckTokenResponseSuccess = {
-  scope: any[];
+  scope: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   exp: number;
   authorities: {
     authority: string;

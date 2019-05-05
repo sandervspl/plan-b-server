@@ -6,5 +6,5 @@ export interface AuthRequest extends i.Request {
 }
 
 export interface Repositories {
-  [index: string]: Repository<any>;
+  [index: string]: Repository<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }

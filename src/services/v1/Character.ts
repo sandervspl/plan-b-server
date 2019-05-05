@@ -1,7 +1,7 @@
+import qs from 'querystring';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import fetch from 'node-fetch';
 import oauth2 from 'simple-oauth2';
-import qs from 'querystring';
 import apiconfig from 'config/apiconfig';
 
 @Injectable()
@@ -11,7 +11,7 @@ export default class CharacterService {
   public async single(name: string, accessToken: oauth2.AccessToken) {
     const queries = qs.stringify({
       locale: 'en_GB',
-      access_token: accessToken.token.access_token,
+      access_token: accessToken.token.access_token, // eslint-disable-line @typescript-eslint/camelcase
       fields: 'guild',
     });
 

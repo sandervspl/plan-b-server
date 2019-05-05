@@ -1,4 +1,3 @@
-import * as i from 'types';
 import secret from './secret';
 
 const db = secret.databaseInfo;

@@ -7,6 +7,6 @@ export abstract class Service<E> {
   ) {}
 
   // protected get repo() {
-    // return Database.connection.getRepository<E>(this.entity);
+  // return Database.connection.getRepository<E>(this.entity);
   // }
 }
