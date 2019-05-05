@@ -493,12 +493,7 @@ export type CharacterData = {
   name: string;
   realm: string;
   battlegroup: string;
-  class: {
-    id: number;
-    mask: number;
-    powerType: string;
-    name: string;
-  };
+  class: number;
   race: number;
   gender: number;
   level: number;
