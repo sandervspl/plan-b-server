@@ -10,9 +10,10 @@ export interface DatabaseConnectDetails {
 export interface SecretInfo {
   readonly databaseInfo: DatabaseConnectDetails;
   readonly jwtSecret: string;
+  readonly sessionSecret: string;
 }
 
-export interface BlizzardInfo {
+export interface Oauth2Info {
   readonly publicKey: string;
   readonly privateKey: string;
 }

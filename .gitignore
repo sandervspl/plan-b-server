@@ -6,3 +6,5 @@ node_modules/
 Procfile
 herokugit
 src/config/blizzard.ts
+src/config/discord.ts
+src/config/secret.ts
