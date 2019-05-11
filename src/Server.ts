@@ -39,8 +39,24 @@ passport.use(discordStrategy);
 async function bootstrap() {
   const app = await NestFactory.create(ApplicationModule);
 
+  const whitelist = [
+    'http://localhost:3000',
+    'http://dev.planbguild.eu',
+  ];
+
   // Enable CORS
-  app.use(cors());
+  app.use(cors({
+    credentials: true,
+    origin: (origin, callback) => {
+      const sameServer = !origin;
+
+      if (sameServer || whitelist.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+  }));
 
   // Block the header from containing information about the server
   app.disable('x-powered-by');
@@ -49,7 +65,11 @@ async function bootstrap() {
     secret: secret.sessionSecret,
     name: 'plan-b-auth',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 60 * 24 * 60 * 60 * 1000,
+      secure: false,
+    },
   }));
 
   app.use(passport.initialize());

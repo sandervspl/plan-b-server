@@ -14,9 +14,14 @@ export default class AuthController {
 
   @Get('/auth/callback')
   private async callback(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction) {
+    const env = process.env.node_env || 'development';
+    const host = env === 'development'
+      ? 'http://localhost:3000'
+      : 'http://dev.planbguild.eu';
+
     const fn = passport.authenticate(
       'discord',
-      { failureRedirect: 'http://dev.planbguild.eu/login/error' },
+      { failureRedirect: `${host}/login/error` },
       (err, user) => {
         if (err) return next(err);
         if (!user) return next(new UnauthorizedException());
@@ -24,9 +29,9 @@ export default class AuthController {
         // Save user to session under "req.user"
         req.login(user, (err) => {
           if (err) {
-            res.redirect(500, 'http://dev.planbguild.eu/login/error');
+            res.redirect(500, `${host}/login/error`);
           } else {
-            res.redirect('http://dev.planbguild.eu');
+            res.redirect(`${host}/login?auth=true`);
           }
         });
       },
@@ -37,6 +42,10 @@ export default class AuthController {
 
   @Get('/auth/me')
   private async test(@Req() req: Request, @Res() res: Response) {
+    if (!req.user) {
+      throw new UnauthorizedException();
+    }
+
     return res.json(req.user);
   }
 }
