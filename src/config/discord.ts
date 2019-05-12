@@ -8,7 +8,7 @@ class DiscordConfig {
       ? 'http://localhost:8080'
       : 'http://api.planbguild.eu';
 
-    return `http://${host}/${this.callbackApiEndpoint}`;
+    return `${host}/${this.callbackApiEndpoint}`;
   }
 }
 
