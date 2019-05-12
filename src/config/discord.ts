@@ -3,7 +3,7 @@ class DiscordConfig {
   public readonly callbackApiEndpoint = 'discord/auth/callback';
 
   public get callbackUrl() {
-    const env = process.env.node_env || 'development';
+    const env = process.env.NODE_ENV || 'development';
     const host = env === 'development'
       ? 'http://localhost:8080'
       : 'http://api.planbguild.eu';

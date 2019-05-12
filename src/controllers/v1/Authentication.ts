@@ -14,7 +14,7 @@ export default class AuthController {
 
   @Get('/auth/callback')
   private async callback(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction) {
-    const env = process.env.node_env || 'development';
+    const env = process.env.NODE_ENV || 'development';
     const host = env === 'development'
       ? 'http://localhost:3000'
       : 'http://dev.planbguild.eu';
