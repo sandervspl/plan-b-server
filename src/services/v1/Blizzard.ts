@@ -3,7 +3,7 @@ import * as i from 'types';
 import { Injectable } from '@nestjs/common';
 import oauth2 from 'simple-oauth2';
 import fetch from 'node-fetch';
-import blizzardConfig from 'config/blizzard';
+import secretConfig from 'config/secret';
 import apiconfig from 'config/apiconfig';
 
 @Injectable()
@@ -56,8 +56,8 @@ export default class BlizzardService {
   public auth = async (): Promise<oauth2.AccessToken> => {
     const auth = oauth2.create({
       client: {
-        id: blizzardConfig.publicKey,
-        secret: blizzardConfig.privateKey,
+        id: secretConfig.blizzard.publicKey,
+        secret: secretConfig.blizzard.privateKey,
       },
       auth: {
         tokenHost: apiconfig.battlenetApiUrl,

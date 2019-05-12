@@ -1,21 +1,20 @@
 import 'reflect-metadata';
+import { NestFactory } from '@nestjs/core';
 import cors from 'cors';
-import refresh from 'passport-oauth2-refresh';
+// import refresh from 'passport-oauth2-refresh';
 import DiscordStrategy from 'passport-discord';
 import passport from 'passport';
-import bodyParser from 'body-parser';
 import session from 'express-session';
+import secretConfig from 'config/secret';
 import apiConfig from 'config/apiconfig';
-import secret from 'config/secret';
-
-import { NestFactory } from '@nestjs/core';
-import ApplicationModule from 'modules/v1/Api';
 import discordConfig from 'config/discord';
+
+import ApplicationModule from 'modules/v1/Api';
 
 const discordStrategy = new DiscordStrategy(
   {
-    clientID: discordConfig.publicKey,
-    clientSecret: discordConfig.privateKey,
+    clientID: secretConfig.discord.publicKey,
+    clientSecret: secretConfig.discord.privateKey,
     callbackURL: discordConfig.callbackUrl,
     scope: discordConfig.scopes,
   },
@@ -62,7 +61,7 @@ async function bootstrap() {
   app.disable('x-powered-by');
 
   app.use(session({
-    secret: secret.sessionSecret,
+    secret: secretConfig.sessionSecret,
     name: 'plan-b-auth',
     resave: false,
     saveUninitialized: true,
@@ -76,7 +75,7 @@ async function bootstrap() {
   app.use(passport.session());
 
   await app.listen(apiConfig.port, () => {
-    const db = secret.databaseInfo;
+    const db = secretConfig.databaseInfo;
     console.info(`API server started on ${db.host}:${apiConfig.port}`);
   });
 }

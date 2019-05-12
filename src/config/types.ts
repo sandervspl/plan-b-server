@@ -1,3 +1,5 @@
+import * as i from 'types';
+
 export interface DatabaseConnectDetails {
   host: string;
   port: number;
@@ -11,6 +13,8 @@ export interface SecretInfo {
   readonly databaseInfo: DatabaseConnectDetails;
   readonly jwtSecret: string;
   readonly sessionSecret: string;
+  readonly blizzard: i.Oauth2Info;
+  readonly discord: i.Oauth2Info;
 }
 
 export interface Oauth2Info {
