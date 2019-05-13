@@ -74,13 +74,18 @@ export default class DiscordService {
     // Set auth level for this session's user
     this.setAuthLevel(req, user.id);
 
+    const publicUser = this.getPublicUser(user);
+
     // Set auth level for rendering specific parts of the UI
-    user.authLevel = this.getAuthLevel(user.id);
+    publicUser.authLevel = this.getAuthLevel(user.id);
 
     // Overwrite avatar hash with a generated avatar url
-    user.avatar = this.getAvatar(user.id, user.avatar);
+    publicUser.avatar = this.getAvatar(user.id, user.avatar);
 
-    return res.json(this.getPublicUser(user));
+    // Get display name from Discord channel
+    publicUser.username = this.getGuildMember(user.id).displayName;
+
+    return res.json(publicUser);
   }
 
 
