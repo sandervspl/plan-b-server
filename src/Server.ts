@@ -38,18 +38,13 @@ passport.use(discordStrategy);
 async function bootstrap() {
   const app = await NestFactory.create(ApplicationModule);
 
-  const whitelist = [
-    'http://localhost:3000',
-    'http://dev.planbguild.eu',
-  ];
-
   // Enable CORS
   app.use(cors({
     credentials: true,
     origin: (origin, callback) => {
       const sameServer = !origin;
 
-      if (sameServer || whitelist.includes(origin)) {
+      if (sameServer || apiConfig.CORSWhitelist.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
