@@ -1,5 +1,5 @@
 class DiscordConfig {
-  public readonly scopes = ['identify', 'guilds'];
+  public readonly scopes = ['identify'];
   public readonly callbackApiEndpoint = 'discord/auth/callback';
 
   public get callbackUrl() {
@@ -10,6 +10,10 @@ class DiscordConfig {
 
     return `${host}/${this.callbackApiEndpoint}`;
   }
+
+  public readonly adminIds = [
+    '561717969005183018', // pretty cool guy
+  ];
 }
 
 const discordConfig = new DiscordConfig();
