@@ -55,13 +55,15 @@ async function bootstrap() {
   // Block the header from containing information about the server
   app.disable('x-powered-by');
 
+  const YEAR_IN_MS = 3.154e10;
+
   app.use(session({
     secret: secretConfig.sessionSecret,
     name: 'plan-b-auth',
     resave: false,
     saveUninitialized: true,
     cookie: {
-      maxAge: 60 * 24 * 60 * 60 * 1000,
+      maxAge: YEAR_IN_MS,
       secure: false,
     },
   }));

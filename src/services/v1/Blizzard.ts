@@ -35,7 +35,8 @@ export default class BlizzardService {
     }
 
     const checkAccessTokenSuccess = checkAccessTokenValid as i.CheckTokenResponseSuccess;
-    if (checkAccessTokenSuccess.exp && checkAccessTokenSuccess.exp <= 100) {
+    const MIN_EXPIRE_TIME = 100;
+    if (checkAccessTokenSuccess.exp && checkAccessTokenSuccess.exp <= MIN_EXPIRE_TIME) {
       return true;
     }
 

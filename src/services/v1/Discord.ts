@@ -4,10 +4,12 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import passport from 'passport';
 import Discord from 'discord.js';
 import * as _ from 'lodash';
+import { RESPONSE_CODE } from 'helpers';
 import discordConfig from 'config/discord';
 import apiConfig from 'config/apiconfig';
 import secretConfig from 'config/secret';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExpressParamsFn = (req: Request, res: Response, next: NextFunction) => any;
 
 enum AUTH_LEVEL {
@@ -51,7 +53,7 @@ export default class DiscordService {
         // Save user to session under "req.user"
         req.login(user, (err) => {
           if (err) {
-            res.redirect(500, `${websiteDomain}/login/error`);
+            res.redirect(RESPONSE_CODE.INTERNAL_SERVER_ERR, `${websiteDomain}/login/error`);
           } else {
             res.redirect(`${websiteDomain}/login?auth=true`);
           }
@@ -82,7 +84,7 @@ export default class DiscordService {
   }
 
 
-  private getGuildMember = (memberId): Discord.GuildMember => {
+  private getGuildMember = (memberId: string): Discord.GuildMember => {
     return this.guild.members.get(memberId);
   }
 
@@ -127,7 +129,8 @@ export default class DiscordService {
   }
 
   private getAvatar = (userId: string, avatarHash: string) => {
-    const isGif = avatarHash.substr(0, 2) === '_a';
+    const START = 0, END = 2;
+    const isGif = avatarHash.substr(START, END) === '_a';
     const imgExtension = isGif ? 'gif' : 'png';
 
     return `${apiConfig.discordCdnUrl}/avatars/${userId}/${avatarHash}.${imgExtension}`;

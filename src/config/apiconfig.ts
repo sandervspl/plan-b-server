@@ -1,4 +1,5 @@
 class Config {
+  // eslint-disable-next-line no-magic-numbers
   public readonly port = 8080;
   public domain = process.env.NODE_ENV ? 'localhost' : process.env.PUBLIC_URL;
 
