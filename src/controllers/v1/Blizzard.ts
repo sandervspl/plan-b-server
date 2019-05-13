@@ -3,7 +3,9 @@ import BlizzardService from 'services/v1/Blizzard';
 
 @Controller('blizzard')
 export default class BlizzardController {
-  constructor(private readonly blizzardService: BlizzardService) {}
+  constructor(
+    private readonly blizzardService: BlizzardService
+  ) {}
 
   @Get('/auth')
   private async auth() {
