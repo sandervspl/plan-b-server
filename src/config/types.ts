@@ -14,7 +14,10 @@ export interface SecretInfo {
   readonly jwtSecret: string;
   readonly sessionSecret: string;
   readonly blizzard: i.Oauth2Info;
-  readonly discord: i.Oauth2Info;
+  readonly discord: i.Oauth2Info & {
+    botToken: string;
+    planBServerId: string;
+  };
 }
 
 export interface Oauth2Info {
