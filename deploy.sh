@@ -166,7 +166,7 @@ ssh $ROOT_USER@$HOST << EOF
     . /home/sandervspl/.nvm/nvm.sh;
     npm install --production --prefix $PDIR-$VERSION;
     echo -e "🏡 $c Starting server $nc"
-    NODE_ENV=production PORT=$PORT pm2 start $PDIR-$VERSION/$PM2_CONFIG_NAME
+    NODE_ENV=production APP_ENV=$APP_ENV PORT=$PORT pm2 start $PDIR-$VERSION/$PM2_CONFIG_NAME
 EOF
     # ln -n -f -s $PDIR-$VERSION $PDIR;
 
