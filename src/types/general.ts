@@ -1,8 +1,16 @@
-import * as i from 'types';
+import * as i from 'types'; // eslint-disable-line
 import { Repository } from 'typeorm';
 
-export interface AuthRequest extends i.Request {
-  token: string;
+declare global {
+  // eslint-disable-next-line
+  namespace Express {
+    interface Request {
+      user?: i.UserData & {
+        authLevel: number;
+        avatarUrl: string;
+      };
+    }
+  }
 }
 
 export interface Repositories {
