@@ -66,6 +66,7 @@ async function bootstrap() {
       maxAge: YEAR_IN_MS,
       secure: false,
     },
+    // store: @todo store sessie in db
   }));
 
   app.use(passport.initialize());

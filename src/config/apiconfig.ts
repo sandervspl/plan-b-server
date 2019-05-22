@@ -8,7 +8,7 @@ class Config {
       case 'test':
         return 'http://dev.planbguild.eu';
       case 'acceptation':
-        return 'httpa://acc.planbguild.eu';
+        return 'https://acc.planbguild.eu';
       case 'production':
         return 'https://planbguild.eu';
       default:

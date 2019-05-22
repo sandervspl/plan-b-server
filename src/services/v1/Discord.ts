@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import passport from 'passport';
 import Discord from 'discord.js';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { RESPONSE_CODE } from 'helpers';
 import discordConfig from 'config/discord';
 import apiConfig from 'config/apiconfig';
@@ -55,7 +55,7 @@ export default class DiscordService {
           if (err) {
             res.redirect(RESPONSE_CODE.INTERNAL_SERVER_ERR, `${websiteDomain}/login/error`);
           } else {
-            res.redirect(`${websiteDomain}/login?auth=true`);
+            res.redirect(`${websiteDomain}`);
           }
         });
       },
