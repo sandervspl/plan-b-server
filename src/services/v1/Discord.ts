@@ -46,7 +46,7 @@ export default class DiscordService {
     const fn = passport.authenticate(
       'discord',
       { failureRedirect: `${websiteDomain}/login/error` },
-      (err, user: i.UserData) => {
+      (err, user?: i.UserData) => {
         if (err) return next(err);
         if (!user) return next(new UnauthorizedException());
 
@@ -55,7 +55,7 @@ export default class DiscordService {
           if (err) {
             res.redirect(RESPONSE_CODE.INTERNAL_SERVER_ERR, `${websiteDomain}/login/error`);
           } else {
-            res.redirect(`${websiteDomain}`);
+            res.redirect(websiteDomain);
           }
         });
       },
@@ -65,7 +65,7 @@ export default class DiscordService {
   }
 
   public me = (req: Request, res: Response) => {
-    const user: i.AugmentedUser = req.user;
+    const user: i.AugmentedUser | undefined = req.user;
 
     if (!user) {
       throw new UnauthorizedException();
@@ -76,14 +76,19 @@ export default class DiscordService {
 
     const publicUser = this.getPublicUser(user);
 
+    // Get display name from Discord channel
+    publicUser.username = this.getGuildMember(user.id).displayName;
+
+    // User is not part of the guild > deny login
+    if (!publicUser.username) {
+      throw new UnauthorizedException();
+    }
+
     // Set auth level for rendering specific parts of the UI
     publicUser.authLevel = this.getAuthLevel(user.id);
 
     // Overwrite avatar hash with a generated avatar url
     publicUser.avatar = this.getAvatar(user.id, user.avatar);
-
-    // Get display name from Discord channel
-    publicUser.username = this.getGuildMember(user.id).displayName;
 
     return res.json(publicUser);
   }
