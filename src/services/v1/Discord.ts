@@ -161,7 +161,11 @@ export default class DiscordService {
     }
   }
 
-  private getAvatar = (userId: string, avatarHash: string) => {
+  private getAvatar = (userId: string, avatarHash?: string) => {
+    if (!avatarHash) {
+      return '';
+    }
+
     const START = 0, END = 2;
     const isGif = avatarHash.substr(START, END) === '_a';
     const imgExtension = isGif ? 'gif' : 'png';

@@ -3,7 +3,7 @@ export type UserData = {
   locale: string;
   mfa_enabled: boolean;
   flags: number;
-  avatar: string;
+  avatar?: string;
   discriminator: string;
   id: string;
   provider: string;
