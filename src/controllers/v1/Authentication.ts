@@ -18,6 +18,11 @@ export default class AuthController {
     this.discordService.authCallback(req, res, next);
   }
 
+  @Get('/auth/logout')
+  private async logout(@Req() req: Request, @Res() res: Response) {
+    this.discordService.logout(req, res);
+  }
+
   @Get('/auth/me')
   private async me(@Req() req: Request, @Res() res: Response) {
     this.discordService.me(req, res);

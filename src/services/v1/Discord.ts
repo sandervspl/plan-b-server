@@ -79,6 +79,11 @@ export default class DiscordService {
     fn(req, res, next);
   }
 
+  public logout = (req: Request, res: Response) => {
+    req.logout();
+    res.redirect(apiConfig.websiteDomain);
+  }
+
   public me = (req: Request, res: Response) => {
     const user = req.user as i.AugmentedUser | undefined;
 
@@ -103,6 +108,7 @@ export default class DiscordService {
     const publicUser = this.getPublicUser(user);
 
     // Get display name from Discord channel
+    publicUser.discordname = publicUser.username;
     publicUser.username = guildMember.displayName;
 
     // Set auth level for rendering specific parts of the UI
@@ -120,8 +126,11 @@ export default class DiscordService {
   }
 
   private getPublicUser = (user: i.AugmentedUser) => {
-    const safeData = [
+    type SafeDataKeys = keyof i.AugmentedUser;
+
+    const safeData: SafeDataKeys[] = [
       'username',
+      'discordname',
       'avatar',
       'id',
       'authLevel',
@@ -146,7 +155,7 @@ export default class DiscordService {
     return false;
   }
 
-  private getAuthLevel = (memberId: string) => {
+  private getAuthLevel = (memberId: string): AUTH_LEVEL => {
     if (this.userIsAdmin(memberId)) {
       return AUTH_LEVEL.ADMIN;
     }
@@ -161,7 +170,7 @@ export default class DiscordService {
     }
   }
 
-  private getAvatar = (userId: string, avatarHash?: string) => {
+  private getAvatar = (userId: string, avatarHash?: string): string => {
     if (!avatarHash) {
       return '';
     }
@@ -173,7 +182,7 @@ export default class DiscordService {
     return `${apiConfig.discordCdnUrl}/avatars/${userId}/${avatarHash}.${imgExtension}`;
   }
 
-  private failRedirect = (reason?: string) => {
+  private failRedirect = (reason?: string): string => {
     if (reason) {
       return `${apiConfig.websiteDomain}/login?err=${reason}`;
     }

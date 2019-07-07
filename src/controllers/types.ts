@@ -13,4 +13,5 @@ export type UserData = {
 
 export type AugmentedUser = UserData & {
   authLevel: number;
+  discordname: string;
 }
