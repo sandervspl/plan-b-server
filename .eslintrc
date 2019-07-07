@@ -102,7 +102,7 @@
     "no-shadowed-variable": false,
     "semicolon": [true, "always", "ignore-interfaces"],
     "array-type": [true, "array"],
-    "whitespace": [true, 
+    "whitespace": [true,
       "check-branch",
       "check-decl",
       "check-operator",
@@ -114,7 +114,10 @@
       "check-type-operator",
       "check-preblock"
     ],
-    "no-magic-numbers": "error",
+    "no-magic-numbers": ["error", {
+      "ignore": [0, 1, 401],
+      "ignoreArrayIndexes": true
+    }],
     "@typescript-eslint/indent": ["error", 2],
     "@typescript-eslint/explicit-function-return-type": false,
     "@typescript-eslint/no-empty-interface": false,

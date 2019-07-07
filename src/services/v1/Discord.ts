@@ -20,22 +20,27 @@ enum AUTH_LEVEL {
 @Injectable()
 export default class DiscordService {
   private discordClient: Discord.Client;
-  private guild: Discord.Guild;
+  private guild?: Discord.Guild;
 
   constructor() {
     this.discordClient = new Discord.Client();
     this.discordClient.login(secretConfig.discord.botToken);
 
     this.discordClient.on('ready', () => {
-      // eslint-disable-next-line
-      console.log('Discord bot activated.');
+      console.info('Discord bot activated.');
 
       this.guild = this.discordClient.guilds.get(secretConfig.discord.planBServerId);
     });
   }
 
   public auth: ExpressParamsFn = (req, res, next) => {
-    const fn = passport.authenticate('discord', { scope: discordConfig.scopes });
+    const fn = passport.authenticate(
+      'discord',
+      {
+        scope: discordConfig.scopes,
+        failureRedirect: this.failRedirect(),
+      }
+    );
 
     fn(req, res, next);
   }
@@ -45,15 +50,25 @@ export default class DiscordService {
 
     const fn = passport.authenticate(
       'discord',
-      { failureRedirect: `${websiteDomain}/login/error` },
+      { failureRedirect: this.failRedirect('discord') },
       (err, user?: i.UserData) => {
-        if (err) return next(err);
-        if (!user) return next(new UnauthorizedException());
+        if (err) {
+          return next(err);
+        }
+
+        // Only guild members are allowed to sign in
+        if (!user || !this.getGuildMember(user.id)) {
+          return res
+            .status(RESPONSE_CODE.UNAUTHORIZED)
+            .redirect(this.failRedirect('auth'));
+        }
 
         // Save user to session under "req.user"
         req.login(user, (err) => {
           if (err) {
-            res.redirect(RESPONSE_CODE.INTERNAL_SERVER_ERR, `${websiteDomain}/login/error`);
+            res
+              .status(RESPONSE_CODE.INTERNAL_SERVER_ERR)
+              .redirect(this.failRedirect('server'));
           } else {
             res.redirect(websiteDomain);
           }
@@ -65,10 +80,21 @@ export default class DiscordService {
   }
 
   public me = (req: Request, res: Response) => {
-    const user: i.AugmentedUser | undefined = req.user;
+    const user = req.user as i.AugmentedUser | undefined;
 
     if (!user) {
-      throw new UnauthorizedException();
+      return res
+        .status(RESPONSE_CODE.UNAUTHORIZED)
+        .redirect(this.failRedirect('auth'));
+    }
+
+    const guildMember = this.getGuildMember(user.id);
+
+    // Only guild members are allowed to sign in
+    if (!guildMember) {
+      return res
+        .status(RESPONSE_CODE.UNAUTHORIZED)
+        .redirect(this.failRedirect('auth'));
     }
 
     // Set auth level for this session's user
@@ -77,12 +103,7 @@ export default class DiscordService {
     const publicUser = this.getPublicUser(user);
 
     // Get display name from Discord channel
-    publicUser.username = this.getGuildMember(user.id).displayName;
-
-    // User is not part of the guild > deny login
-    if (!publicUser.username) {
-      throw new UnauthorizedException();
-    }
+    publicUser.username = guildMember.displayName;
 
     // Set auth level for rendering specific parts of the UI
     publicUser.authLevel = this.getAuthLevel(user.id);
@@ -94,8 +115,8 @@ export default class DiscordService {
   }
 
 
-  private getGuildMember = (memberId: string): Discord.GuildMember => {
-    return this.guild.members.get(memberId);
+  private getGuildMember = (memberId: string): Discord.GuildMember | undefined => {
+    return this.guild && this.guild.members.get(memberId);
   }
 
   private getPublicUser = (user: i.AugmentedUser) => {
@@ -103,7 +124,6 @@ export default class DiscordService {
       'username',
       'avatar',
       'id',
-      'fetchedAt',
       'authLevel',
     ];
 
@@ -114,12 +134,12 @@ export default class DiscordService {
     const user = this.getGuildMember(memberId);
 
     // Check if user has a role that acts as an admin
-    if (discordConfig.adminIds.find((roleId) => !!user.roles.get(roleId))) {
+    if (discordConfig.adminIds.find((roleId) => user && !!user.roles.get(roleId))) {
       return true;
     }
 
     // Check is user is owner of the Discord channel
-    if (this.guild.ownerID === memberId) {
+    if (this.guild && this.guild.ownerID === memberId) {
       return true;
     }
 
@@ -135,7 +155,10 @@ export default class DiscordService {
   }
 
   private setAuthLevel = (req: Request, userId: string) => {
-    req.session.authLevel = this.getAuthLevel(userId);
+    // @TODO store in db
+    if (req.session) {
+      req.session.authLevel = this.getAuthLevel(userId);
+    }
   }
 
   private getAvatar = (userId: string, avatarHash: string) => {
@@ -144,5 +167,13 @@ export default class DiscordService {
     const imgExtension = isGif ? 'gif' : 'png';
 
     return `${apiConfig.discordCdnUrl}/avatars/${userId}/${avatarHash}.${imgExtension}`;
+  }
+
+  private failRedirect = (reason?: string) => {
+    if (reason) {
+      return `${apiConfig.websiteDomain}/login?err=${reason}`;
+    }
+
+    return `${apiConfig.websiteDomain}/login`;
   }
 }

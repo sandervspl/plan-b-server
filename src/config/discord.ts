@@ -6,7 +6,7 @@ class DiscordConfig {
     const env = process.env.NODE_ENV || 'development';
     const host = env === 'development'
       ? 'http://localhost:8080'
-      : 'http://api.planbguild.eu';
+      : 'https://api.planbguild.eu';
 
     return `${host}/${this.callbackApiEndpoint}`;
   }

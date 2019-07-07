@@ -1,17 +1,25 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import cors from 'cors';
-// import refresh from 'passport-oauth2-refresh';
 import DiscordStrategy from 'passport-discord';
 import passport from 'passport';
-import session from 'express-session';
+import session, { SessionOptions } from 'express-session';
+import mysqlSession from 'express-mysql-session';
 import secretConfig from 'config/secret';
 import apiConfig from 'config/apiconfig';
 import discordConfig from 'config/discord';
-
 import ApplicationModule from 'modules/v1/Api';
 
-const discordStrategy = new DiscordStrategy(
+const isProd = process.env.NODE_ENV === 'production';
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.use(new DiscordStrategy(
   {
     clientID: secretConfig.discord.publicKey,
     clientSecret: secretConfig.discord.privateKey,
@@ -23,20 +31,18 @@ const discordStrategy = new DiscordStrategy(
       return done(null, user);
     });
   }
-);
-
-// Save user to session
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
-
-// oauth helper
-passport.use(discordStrategy);
+));
 
 /** @todo Refresh oauth token */
 // refresh.use(discordStrategy);
 
 async function bootstrap() {
   const app = await NestFactory.create(ApplicationModule);
+
+  if (isProd) {
+    app.set('trust proxy', 1); // Trust first proxy
+    app.disable('x-powered-by'); // Hide information about the server
+  }
 
   // Enable CORS
   app.use(cors({
@@ -52,29 +58,35 @@ async function bootstrap() {
     },
   }));
 
-  // Block the header from containing information about the server
-  app.disable('x-powered-by');
+  // @ts-ignore this works?
+  const MysqlStore = mysqlSession(session);
+  const mysqlCfg = {
+    host: 'localhost',
+    port: 3306,
+    user: 'sandervspl',
+    password: 'soulfly64',
+    database: 'planbcms',
+  };
 
-  const YEAR_IN_MS = 3.154e10;
-
-  app.use(session({
+  const sessionName = 'plan-b-auth';
+  const sessionCfg: SessionOptions = {
     secret: secretConfig.sessionSecret,
-    name: 'plan-b-auth',
+    name: sessionName,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    proxy: isProd,
     cookie: {
-      maxAge: YEAR_IN_MS,
-      secure: false,
+      secure: isProd,
     },
-    // store: @todo store sessie in db
-  }));
+    store: new MysqlStore(mysqlCfg),
+  };
 
+  app.use(session(sessionCfg));
   app.use(passport.initialize());
   app.use(passport.session());
 
   await app.listen(apiConfig.port, () => {
-    const db = secretConfig.databaseInfo;
-    console.info(`API server started on ${db.host}:${apiConfig.port}`);
+    console.info(`[${process.env.NODE_ENV}] API server started on localhost:${apiConfig.port}`);
   });
 }
 
