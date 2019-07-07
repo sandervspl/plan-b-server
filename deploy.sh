@@ -1,29 +1,29 @@
 #!/bin/bash
 PROJECT='planbguild.eu'
 
-ROOT_USER=
+ROOT_USER=root
 
 TEST_HOST=134.209.85.102
-TEST_USER=root
+TEST_USER=sandervspl
 
 TEST_PORT=3002
 
 ACC_HOST=
-ACC_USER=root
+ACC_USER=sandervspl
 
 PROD_HOST=134.209.85.102
-PROD_USER=root
+PROD_USER=sandervspl
 
 #Don't touch this
 ENV=$1
 
 #!/bin/bash
 if [ -z "$PROD_USER" ]; then
-    PROD_USER=root
+    PROD_USER=sandervspl
 fi
 
 if [ -z "$ACC_USER" ]; then
-    ACC_USER=root
+    ACC_USER=sandervspl
 fi
 
 if [ -z "$TEST_HOST" ]; then
@@ -31,7 +31,7 @@ if [ -z "$TEST_HOST" ]; then
 fi
 
 if [ -z "$TEST_USER" ]; then
-    TEST_USER=root
+    TEST_USER=sandervspl
 fi
 
 if [ -z "$ROOT_USER" ]; then
@@ -138,27 +138,27 @@ APP_ENV=$APP_ENV npm run build
 
 #Create PM2 config file
 echo -e "⚡️ $c Generating PM2 server file $nc"
-sed "s/USER/$USER/g; s/PROJECT/$PROJECT-$VERSION/g; s/INSTANCES/$INSTANCES/g"  ./pm2-config-template.json > $PM2_CONFIG_NAME
+sed "s/port/$PORT/g; s/app_env/$APP_ENV/g; s/PROJECT/$PROJECT-$VERSION/g; s/INSTANCES/$INSTANCES/g"  ./pm2-config-template.json > $PM2_CONFIG_NAME
 
 #Build tar and copy to server
 echo -e "🚚 $c Copying files to server $nc"
 tar -czf $FILENAME ./dist ./package.json ./package-lock.json ./tsconfig-paths-bootstrap.js ./tsconfig.json ./$PM2_CONFIG_NAME
-scp -r ./$FILENAME $ROOT_USER@$HOST:~
+scp -r ./$FILENAME $USER@$HOST:~
 rm ./$FILENAME
 rm ./$PM2_CONFIG_NAME
 
 echo -e "🔑 $c Connecting to $HOST $nc"
 #Set-up new files, install packages and run server
-ssh $ROOT_USER@$HOST << EOF
+ssh $USER@$HOST << EOF
     echo -e "🐶 $c Initializing server $nc"
     if [ "$1" = TEST ]; then
-        sudo rm -rf $PDIR*
+        rm -rf $PDIR*
     fi
-    sudo mkdir -p $PDIR-$VERSION;
-    sudo chown $USER:$USER $PDIR-$VERSION;
-    sudo chown $USER:$USER /var/www;
-    sudo mv ~/$FILENAME $PDIR-$VERSION;
-    sudo su - $USER;
+    mkdir -p $PDIR-$VERSION;
+    chown $USER:$USER $PDIR-$VERSION;
+    chown $USER:$USER /var/api;
+    mv ~/$FILENAME $PDIR-$VERSION;
+    su - $USER;
     echo -e "👀 $c Extracting files $nc"
     tar -zxvf $PDIR-$VERSION/$FILENAME -C $PDIR-$VERSION;
     rm $PDIR-$VERSION/$FILENAME;
@@ -166,7 +166,8 @@ ssh $ROOT_USER@$HOST << EOF
     . /home/sandervspl/.nvm/nvm.sh;
     npm install --production --prefix $PDIR-$VERSION;
     echo -e "🏡 $c Starting server $nc"
-    NODE_ENV=production APP_ENV=$APP_ENV PORT=$PORT pm2 start $PDIR-$VERSION/$PM2_CONFIG_NAME
+    pm2 del $PROJECT
+    pm2 start $PDIR-$VERSION/$PM2_CONFIG_NAME
 EOF
     # ln -n -f -s $PDIR-$VERSION $PDIR;
 
