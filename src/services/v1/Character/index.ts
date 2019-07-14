@@ -13,7 +13,7 @@ export default class CharacterService {
     private readonly blizzardService: BlizzardService,
   ) {}
 
-  public async getClass(classId: number) {
+  public getClass = async (classId: number) => {
     const queries = qs.stringify(this.blizzardService.queries);
 
     try {
@@ -35,7 +35,7 @@ export default class CharacterService {
     }
   }
 
-  public async single(name: string) {
+  public single = async (name: string) => {
     const queries = qs.stringify({
       ...this.blizzardService.queries,
       fields: 'guild,items,professions',

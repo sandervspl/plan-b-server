@@ -8,7 +8,7 @@ import apiconfig from 'config/apiconfig';
 
 @Injectable()
 export default class BlizzardService {
-  private accessToken: oauth2.AccessToken;
+  private accessToken!: oauth2.AccessToken;
 
   public get queries() {
     return {

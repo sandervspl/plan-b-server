@@ -16,6 +16,16 @@ class Config {
     }
   }
 
+  public get cmsDomain() {
+    switch (process.env.APP_ENV) {
+      case 'test':
+      case 'acceptation':
+      case 'production':
+      default:
+        return 'https://cms.planbguild.eu';
+    }
+  }
+
   public readonly CORSWhitelist = [
     'http://localhost:3000',
     'https://dev.planbguild.eu',
