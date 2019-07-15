@@ -1,6 +1,6 @@
 import * as i from 'types';
 import { Request, Response, NextFunction } from 'express';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import passport from 'passport';
 import Discord from 'discord.js';
 import _ from 'lodash';
@@ -11,11 +11,6 @@ import secretConfig from 'config/secret';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExpressParamsFn = (req: Request, res: Response, next: NextFunction) => any;
-
-enum AUTH_LEVEL {
-  USER,
-  ADMIN,
-}
 
 @Injectable()
 export default class DiscordService {
@@ -155,12 +150,12 @@ export default class DiscordService {
     return false;
   }
 
-  private getAuthLevel = (memberId: string): AUTH_LEVEL => {
+  private getAuthLevel = (memberId: string): i.AUTH_LEVEL => {
     if (this.userIsAdmin(memberId)) {
-      return AUTH_LEVEL.ADMIN;
+      return i.AUTH_LEVEL.ADMIN;
     }
 
-    return AUTH_LEVEL.USER;
+    return i.AUTH_LEVEL.USER;
   }
 
   private setAuthLevel = (req: Request, userId: string) => {
