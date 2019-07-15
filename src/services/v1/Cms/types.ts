@@ -69,6 +69,11 @@ export type CharRaidExperience = {
   naxxramas?: boolean;
 }
 
+export type Role = i.BaseResponseBody & {
+  name: string;
+  icon: i.Image;
+}
+
 
 export type ApplicationStatus = 'open' | 'accepted' | 'rejected';
 
@@ -86,7 +91,7 @@ export type ApplicationData = i.BaseResponseBody & {
   char_secondary_proff_3?: string;
   char_secondary_proff_3_level?: number;
   char_server: string;
-  char_role: string;
+  characterrole: i.Role;
   char_race: string;
   name: string;
   age: number;

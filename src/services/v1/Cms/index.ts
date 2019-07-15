@@ -57,7 +57,7 @@ export default class CmsService {
             level: app.char_level,
             race: app.char_race,
             class: app.class,
-            role: app.char_role,
+            role: app.characterrole,
             server: app.char_server,
             raidExperience: app.char_raid_experience,
             professions: {
