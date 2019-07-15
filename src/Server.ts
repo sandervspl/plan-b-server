@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import DiscordStrategy from 'passport-discord';
 import passport from 'passport';
 import session, { SessionOptions } from 'express-session';
@@ -43,6 +44,8 @@ async function bootstrap() {
     app.set('trust proxy', 1); // Trust first proxy
     app.disable('x-powered-by'); // Hide information about the server
   }
+
+  app.use(cookieParser());
 
   // Enable CORS
   app.use(cors({
