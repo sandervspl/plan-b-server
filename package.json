@@ -33,6 +33,7 @@
     "typeorm": "^0.2.7"
   },
   "devDependencies": {
+    "@types/cookie-parser": "1.4.1",
     "@types/cors": "^2.8.4",
     "@types/express": "^4.11.1",
     "@types/express-mysql-session": "1.2.2",

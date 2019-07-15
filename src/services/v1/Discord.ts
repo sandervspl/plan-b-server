@@ -1,6 +1,6 @@
 import * as i from 'types';
 import { Request, Response, NextFunction } from 'express';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import passport from 'passport';
 import Discord from 'discord.js';
 import _ from 'lodash';
@@ -83,9 +83,12 @@ export default class DiscordService {
     const user = req.user as i.AugmentedUser | undefined;
 
     if (!user) {
-      return res
-        .status(RESPONSE_CODE.UNAUTHORIZED)
-        .redirect(this.failRedirect('auth'));
+      // @TODO this throws frontend in an infinite /me request loop
+      // return res
+      //   .status(RESPONSE_CODE.UNAUTHORIZED)
+      //   .redirect(this.failRedirect('auth'));
+
+      throw new UnauthorizedException();
     }
 
     const guildMember = this.getGuildMember(user.id);
@@ -138,7 +141,7 @@ export default class DiscordService {
     const user = this.getGuildMember(memberId);
 
     // Check if user has a role that acts as an admin
-    if (discordConfig.adminIds.find((roleId) => user && !!user.roles.get(roleId))) {
+    if (discordConfig.adminIds.find((roleId) => !!user && !!user.roles.get(roleId))) {
       return true;
     }
 
