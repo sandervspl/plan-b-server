@@ -47,7 +47,11 @@ export default class CmsService {
 
       /* eslint-disable @typescript-eslint/camelcase */
       const modData = data
+        // Filter out applications with requested status
         .filter((app) => app.status === status)
+        // Sort by date, descending
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        // Fix data response
         .map((app) => ({
           id: app.id,
           created_at: app.created_at,
