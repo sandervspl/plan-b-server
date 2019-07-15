@@ -13,7 +13,7 @@ import secretConfig from 'config/secret';
 type ExpressParamsFn = (req: Request, res: Response, next: NextFunction) => any;
 
 @Injectable()
-export default class DiscordService {
+export default class AuthService {
   private discordClient: Discord.Client;
   private guild?: Discord.Guild;
 

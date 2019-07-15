@@ -11,7 +11,6 @@ export interface DatabaseConnectDetails {
 // Interface for the class that holds secret info and is ignored by GIT
 export interface SecretInfo {
   readonly databaseInfo: DatabaseConnectDetails;
-  readonly jwtSecret: string;
   readonly sessionSecret: string;
   readonly blizzard: i.Oauth2Info;
   readonly discord: i.Oauth2Info & {

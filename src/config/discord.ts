@@ -1,6 +1,6 @@
 class DiscordConfig {
   public readonly scopes = ['identify'];
-  public readonly callbackApiEndpoint = 'discord/auth/callback';
+  public readonly callbackApiEndpoint = 'auth/callback';
 
   public get callbackUrl() {
     const env = process.env.NODE_ENV || 'development';

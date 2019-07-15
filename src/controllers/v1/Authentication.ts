@@ -1,30 +1,30 @@
 import { Request, Response, NextFunction } from 'express';
 import { Controller, Get, Req, Res, Next } from '@nestjs/common';
-import DiscordService from 'services/v1/Discord';
+import AuthService from 'services/v1/Auth';
 
-@Controller('discord')
+@Controller('auth')
 export default class AuthController {
   constructor(
-    private readonly discordService: DiscordService
+    private readonly authService: AuthService
   ) {}
 
-  @Get('/auth')
+  @Get('/')
   private async auth(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction) {
-    this.discordService.auth(req, res, next);
+    this.authService.auth(req, res, next);
   }
 
-  @Get('/auth/callback')
+  @Get('/callback')
   private async callback(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction) {
-    this.discordService.authCallback(req, res, next);
+    this.authService.authCallback(req, res, next);
   }
 
-  @Get('/auth/logout')
+  @Get('/logout')
   private async logout(@Req() req: Request, @Res() res: Response) {
-    this.discordService.logout(req, res);
+    this.authService.logout(req, res);
   }
 
-  @Get('/auth/me')
+  @Get('/me')
   private async me(@Req() req: Request, @Res() res: Response) {
-    this.discordService.me(req, res);
+    this.authService.me(req, res);
   }
 }

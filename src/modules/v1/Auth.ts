@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import AuthController from 'controllers/v1/Authentication';
-import DiscordService from 'services/v1/Discord';
+import AuthService from 'services/v1/Auth';
 
 @Module({
   controllers: [AuthController],
-  providers: [DiscordService],
+  providers: [AuthService],
 })
 export default class AuthModule {}
