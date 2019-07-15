@@ -1,3 +1,11 @@
+import * as i from 'types';
+
+export type BaseResponseBody = {
+  id: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export type Image = {
   id: number;
   name: string;
@@ -8,9 +16,16 @@ export type Image = {
   size: string;
   url: string;
   provider: string;
-  public_id?: number;
+  public_id?: string;
   created_at: Date;
   updated_at: Date;
+}
+
+export type Class = i.BaseResponseBody & {
+  name: string;
+  color: string;
+  recruitment: number;
+  icon: i.Image;
 }
 
 export type Meta = {
@@ -22,7 +37,7 @@ export type Meta = {
   loginpage?: number;
   created_at: Date;
   updated_at: Date;
-  image: Image;
+  image: i.Image;
 }
 
 export type Post = {
@@ -34,7 +49,7 @@ export type Post = {
   homepage: number;
   created_at: Date;
   updated_at: Date;
-  image: Image;
+  image: i.Image;
 }
 
 export type Tag = {
@@ -44,6 +59,44 @@ export type Tag = {
   updated_at: Date;
 }
 
+export type CharRaidExperience = {
+  molten_core?: boolean;
+  onyxia?: boolean;
+  blackwing_lair?: boolean;
+  zul_gurub?: boolean;
+  aq_20?: boolean;
+  aq_40?: boolean;
+  naxxramas?: boolean;
+}
+
+
+export type ApplicationStatus = 'open' | 'accepted' | 'rejected';
+
+export type ApplicationData = i.BaseResponseBody & {
+  char_name: string;
+  char_level: number;
+  char_primary_proff_1?: string;
+  char_primary_proff_1_level?: number;
+  char_primary_proff_2?: string;
+  char_primary_proff_2_level?: number;
+  char_secondary_proff_1?: string;
+  char_secondary_proff_1_level?: number;
+  char_secondary_proff_2?: string;
+  char_secondary_proff_2_level?: number;
+  char_secondary_proff_3?: string;
+  char_secondary_proff_3_level?: number;
+  char_server: string;
+  char_role: string;
+  char_race: string;
+  name: string;
+  age: number;
+  story: string;
+  status: i.ApplicationStatus;
+  char_raid_experience: CharRaidExperience;
+  class: i.Class;
+}
+
+
 export type Basepage = {
   id: number;
   created_at: Date;
@@ -51,18 +104,18 @@ export type Basepage = {
 }
 
 export type Homepage = Basepage & {
-  meta: Meta;
-  posts: Post[];
+  meta: i.Meta;
+  posts: i.Post[];
 }
 
 export type Aboutpage = Basepage & {
-  meta: Meta;
+  meta: i.Meta;
   title: string;
   content: string;
 }
 
 export type Loginpage = Basepage & {
-  meta: Meta;
+  meta: i.Meta;
   title: string;
   content: string;
   disclaimer: string;
@@ -73,9 +126,9 @@ export type NewsDetailpage = Basepage & {
   content: string;
   abstract: string;
   published: boolean;
-  homepage?: Homepage;
-  image: Image;
-  tags?: Tag[];
+  homepage?: i.Homepage;
+  image: i.Image;
+  tags?: i.Tag[];
 }
 
-export type Pages = Homepage | Aboutpage | Loginpage | NewsDetailpage;
+export type Pages = i.Homepage | i.Aboutpage | i.Loginpage | i.NewsDetailpage;

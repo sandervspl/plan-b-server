@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import CmsService from 'services/v1/Cms';
-import { NewsItemParam } from './types';
+import { NewsItemParam, ApplicationsParam } from './types';
 
 @Controller('cms')
 export default class CmsController {
@@ -36,5 +36,10 @@ export default class CmsController {
   @Get('/news/:id')
   private async newsItems(@Param() param: NewsItemParam) {
     return this.cmsService.newsDetail(param.id);
+  }
+
+  @Get('/applications/:status')
+  private async applications(@Param() param: ApplicationsParam) {
+    return this.cmsService.applications(param.status);
   }
 }
