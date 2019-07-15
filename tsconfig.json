@@ -15,6 +15,7 @@
             "config/*": ["config/*"],
             "controllers/*": ["controllers/*"],
             "entities/*": ["entities/*"],
+            "helpers": ["helpers/index"],
             "helpers/*": ["helpers/*"],
             "services/*": ["services/*"],
             "modules/*": ["modules/*"],

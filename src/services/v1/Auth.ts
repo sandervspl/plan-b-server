@@ -8,6 +8,7 @@ import { RESPONSE_CODE } from 'helpers';
 import discordConfig from 'config/discord';
 import apiConfig from 'config/apiconfig';
 import secretConfig from 'config/secret';
+import UserService from 'services/v1/User';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExpressParamsFn = (req: Request, res: Response, next: NextFunction) => any;
@@ -17,7 +18,9 @@ export default class AuthService {
   private discordClient: Discord.Client;
   private guild?: Discord.Guild;
 
-  constructor() {
+  constructor(
+    private readonly userService: UserService,
+  ) {
     this.discordClient = new Discord.Client();
     this.discordClient.login(secretConfig.discord.botToken);
 
@@ -59,13 +62,23 @@ export default class AuthService {
         }
 
         // Save user to session under "req.user"
-        req.login(user, (err) => {
+        req.login(user, async (err) => {
           if (err) {
             res
               .status(RESPONSE_CODE.INTERNAL_SERVER_ERR)
               .redirect(this.failRedirect('server'));
           } else {
-            res.redirect(websiteDomain);
+            // Create user if needed
+            try {
+              await this.userService.create(user);
+
+              // Redirect to website
+              res.redirect(websiteDomain);
+            } catch (err) {
+              return res
+                .status(RESPONSE_CODE.INTERNAL_SERVER_ERR)
+                .redirect(this.failRedirect('server'));
+            }
           }
         });
       },

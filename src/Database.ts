@@ -1,38 +1,37 @@
-// import { createConnection, Connection } from 'typeorm';
-// import ormconfig from 'config/ormconfig';
-// import * as entities from 'entities';
-// import { Repositories } from 'types';
+import { createConnection, Connection } from 'typeorm';
+import ormconfig from 'config/ormconfig';
+import * as entities from 'entities';
+import { Repositories } from 'types';
 
-// class Database {
-//   public connection: Connection;
-//   public repos: Repositories = {};
+class Database {
+  public connection!: Connection;
+  public repos!: Repositories;
 
-//   constructor() {
-//     /* tslint:disable no-console */
-//     // open connection to database
-//     createConnection({
-//       ...ormconfig,
-//       type: 'mysql',
-//       entities: Object.values(entities),
-//     })
-//       .then((connection) => {
-//         console.log('Connection to DB succesful');
+  constructor() {
+    // Open connection to database
+    createConnection({
+      ...ormconfig,
+      type: 'mysql',
+      entities: Object.values(entities),
+    })
+      .then((connection) => {
+        console.info('Connection to DB succesful');
 
-//         this.connection = connection;
+        this.connection = connection;
 
-//         // Set repo on every controller
-//         this.repos = Object.keys(entities).reduce((all, entity) => {
-//           return {
-//             ...all,
-//             [entity.toLowerCase()]: this.connection.getRepository(entities[entity]),
-//           };
-//         }, {});
-//       })
-//       .catch((err) => console.log(err));
-//       /* tslint:enable */
-//   }
-// }
+        // Create repo of every entity
+        this.repos = Object.keys(entities).reduce((all, entity) => {
+          return {
+            ...all,
+            // @ts-ignore I don't understand this type error
+            [entity.toLowerCase()]: this.connection.getRepository(entities[entity]),
+          };
+        }, {} as Repositories);
+      })
+      .catch((err) => console.error(err));
+  }
+}
 
-// const d = new Database();
+const db = new Database();
 
-// export default d;
+export default db;
