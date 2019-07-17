@@ -10,7 +10,19 @@ class User {
   id!: string;
 
   @Column({
+    type: 'varchar',
+  })
+  username!: string;
+
+  @Column({
+    type: 'smallint',
+    default: 0,
+  })
+  authLevel!: number;
+
+  @Column({
     type: 'integer',
+    default: 0,
   })
   dkp!: number;
 

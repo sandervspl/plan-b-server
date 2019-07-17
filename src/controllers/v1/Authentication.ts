@@ -25,6 +25,6 @@ export default class AuthController {
 
   @Get('/me')
   private async me(@Req() req: Request, @Res() res: Response) {
-    this.authService.me(req, res);
+    await this.authService.me(req, res);
   }
 }

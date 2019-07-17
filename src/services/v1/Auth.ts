@@ -68,9 +68,14 @@ export default class AuthService {
               .status(RESPONSE_CODE.INTERNAL_SERVER_ERR)
               .redirect(this.failRedirect('server'));
           } else {
-            // Create user if needed
             try {
-              await this.userService.create(user);
+              // Create user if needed
+              await this.userService.create({
+                id: user.id,
+                authLevel: this.getAuthLevel(user.id),
+                username: this.getGuildMember(user.id)!.displayName,
+                dkp: 0,
+              });
 
               // Redirect to website
               res.redirect(websiteDomain);
@@ -92,7 +97,7 @@ export default class AuthService {
     res.redirect(apiConfig.websiteDomain);
   }
 
-  public me = (req: Request, res: Response) => {
+  public me = async (req: Request, res: Response) => {
     const user = req.user as i.AugmentedUser | undefined;
 
     if (!user) {
@@ -104,6 +109,7 @@ export default class AuthService {
       throw new UnauthorizedException();
     }
 
+    const dbUser = await this.userService.single(user.id);
     const guildMember = this.getGuildMember(user.id);
 
     // Only guild members are allowed to sign in
@@ -118,17 +124,24 @@ export default class AuthService {
 
     const publicUser = this.getPublicUser(user);
 
-    // Get display name from Discord channel
-    publicUser.discordname = publicUser.username;
-    publicUser.username = guildMember.displayName;
+    const body: i.MeResponse = {
+      id: publicUser.id,
 
-    // Set auth level for rendering specific parts of the UI
-    publicUser.authLevel = this.getAuthLevel(user.id);
+      // Get display name from Discord channel
+      discordname: publicUser.username,
+      username: guildMember.displayName,
 
-    // Overwrite avatar hash with a generated avatar url
-    publicUser.avatar = this.getAvatar(user.id, user.avatar);
+      // Set auth level for rendering specific parts of the UI
+      authLevel: this.getAuthLevel(user.id),
 
-    return res.json(publicUser);
+      // Overwrite avatar hash with a generated avatar url
+      avatar: this.getAvatar(user.id, user.avatar),
+
+      // Current dragon kill points
+      dkp: dbUser.dkp,
+    };
+
+    return res.json(body);
   }
 
 

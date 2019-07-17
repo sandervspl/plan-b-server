@@ -15,3 +15,12 @@ export type AugmentedUser = UserData & {
   authLevel: number;
   discordname: string;
 }
+
+export type MeResponse = {
+  username: string;
+  discordname: string;
+  avatar?: string;
+  id: string;
+  authLevel: number;
+  dkp: number;
+}
