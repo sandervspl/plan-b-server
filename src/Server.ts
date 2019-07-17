@@ -61,14 +61,14 @@ async function bootstrap() {
     },
   }));
 
-  // @ts-ignore this works?
+  // @ts-ignore this works
   const MysqlStore = mysqlSession(session);
   const mysqlCfg = {
     host: 'localhost',
     port: 3306,
     user: 'sandervspl',
     password: 'soulfly64',
-    database: 'planbcms',
+    database: 'planb',
   };
 
   const sessionName = 'plan-b-auth';
