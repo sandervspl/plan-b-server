@@ -1,8 +1,7 @@
-import { Request } from 'express';
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import CmsService from 'services/v1/Cms';
 import { AdminGuard } from 'guards/auth';
-import { NewsItemParam, ApplicationsParam } from './types';
+import { NewsItemParam, ApplicationsParam, SingleApplicationParam } from './types';
 
 @Controller('cms')
 export default class CmsController {
@@ -44,5 +43,11 @@ export default class CmsController {
   @UseGuards(AdminGuard)
   private async applications(@Param() param: ApplicationsParam) {
     return this.cmsService.applications(param.status);
+  }
+
+  @Get('/application/:id')
+  @UseGuards(AdminGuard)
+  private async singleApplication(@Param() param: SingleApplicationParam) {
+    return this.cmsService.singleApplication(param.id);
   }
 }

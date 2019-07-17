@@ -45,65 +45,31 @@ export default class CmsService {
       const res = await fetch(`${config.cmsDomain}/applications`);
       const data: i.ApplicationData[] = await res.json();
 
-      /* eslint-disable @typescript-eslint/camelcase */
       const modData = data
         // Filter out applications with requested status
         .filter((app) => app.status === status)
         // Sort by date, descending
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         // Fix data response
-        .map((app) => ({
-          id: app.id,
-          created_at: app.created_at,
-          updated_at: app.updated_at,
-          character: {
-            name: app.char_name,
-            level: app.char_level,
-            race: app.char_race,
-            class: app.class,
-            role: app.characterrole,
-            server: app.char_server,
-            raidExperience: app.char_raid_experience,
-            professions: {
-              primary: [
-                {
-                  name: app.char_primary_proff_1,
-                  level: app.char_primary_proff_1_level,
-                },
-                {
-                  name: app.char_primary_proff_2,
-                  level: app.char_primary_proff_2_level,
-                },
-              ],
-              secondary: [
-                {
-                  name: app.char_secondary_proff_1,
-                  level: app.char_secondary_proff_1_level,
-                },
-                {
-                  name: app.char_secondary_proff_2,
-                  level: app.char_secondary_proff_2_level,
-                },
-                {
-                  name: app.char_secondary_proff_3,
-                  level: app.char_secondary_proff_3_level,
-                },
-              ],
-            },
-          },
-          personal: {
-            name: app.name,
-            age: app.age,
-            story: app.story,
-          },
-        }));
-        /* eslint-enable */
+        .map(this.generateApplicationBody);
 
       return modData;
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
   };
+
+  public singleApplication = async (id: number) => {
+    try {
+      const res = await fetch(`${config.cmsDomain}/applications/${id}`);
+      const data: i.ApplicationData = await res.json();
+
+      return this.generateApplicationBody(data);
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
 
   private cleanupMeta = (data: i.Pages) => {
     if ('meta' in data) {
@@ -112,4 +78,55 @@ export default class CmsService {
       delete data.meta.homepage;
     }
   }
+
+  /* eslint-disable @typescript-eslint/camelcase */
+  private generateApplicationBody = (application: i.ApplicationData) => {
+    return {
+      id: application.id,
+      created_at: application.created_at,
+      updated_at: application.updated_at,
+      status: application.status,
+      character: {
+        name: application.char_name,
+        level: application.char_level,
+        race: application.char_race,
+        class: application.class,
+        role: application.characterrole,
+        server: application.char_server,
+        raidExperience: application.char_raid_experience,
+        professions: {
+          primary: [
+            {
+              name: application.char_primary_proff_1,
+              level: application.char_primary_proff_1_level,
+            },
+            {
+              name: application.char_primary_proff_2,
+              level: application.char_primary_proff_2_level,
+            },
+          ],
+          secondary: [
+            {
+              name: application.char_secondary_proff_1,
+              level: application.char_secondary_proff_1_level,
+            },
+            {
+              name: application.char_secondary_proff_2,
+              level: application.char_secondary_proff_2_level,
+            },
+            {
+              name: application.char_secondary_proff_3,
+              level: application.char_secondary_proff_3_level,
+            },
+          ],
+        },
+      },
+      personal: {
+        name: application.name,
+        age: application.age,
+        story: application.story,
+      },
+    };
+  }
+  /* eslint-enable */
 }
