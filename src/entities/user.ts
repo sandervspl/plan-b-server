@@ -1,5 +1,5 @@
-/* tslint:disable member-access */
-import { Entity, CreateDateColumn, UpdateDateColumn, PrimaryColumn, Column } from 'typeorm';
+import { Entity, CreateDateColumn, UpdateDateColumn, PrimaryColumn, Column, OneToMany } from 'typeorm';
+import ApplicationMessage from './applicationMessage';
 
 @Entity()
 class User {
@@ -15,6 +15,11 @@ class User {
   username!: string;
 
   @Column({
+    type: 'varchar',
+  })
+  avatar!: string;
+
+  @Column({
     type: 'smallint',
     default: 0,
   })
@@ -25,6 +30,9 @@ class User {
     default: 0,
   })
   dkp!: number;
+
+  @OneToMany((type) => ApplicationMessage, (message) => message.user)
+  applicationMessages!: ApplicationMessage[];
 
   @CreateDateColumn()
   createdAt!: Date;

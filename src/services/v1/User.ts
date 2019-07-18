@@ -1,3 +1,4 @@
+import * as i from 'types';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import * as entities from 'entities';
 import { Service } from './Service';
@@ -22,24 +23,17 @@ export default class UserService extends Service<entities.User> {
     }
   }
 
-  public create = async (user: Omit<entities.User, 'createdAt' | 'updatedAt'>) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [users, userAmount] = await this.repo.findAndCount({ id: user.id });
-
-    // User with ID exists
-    if (userAmount > 0) {
-      return;
-    }
-
-    // Create user
+  // Create user
+  public create = async (user: i.CreateUserBody) => {
     const newUser = new entities.User();
     newUser.id = user.id;
     newUser.dkp = 0;
     newUser.authLevel = user.authLevel;
     newUser.username = user.username;
+    newUser.avatar = user.avatar;
 
     try {
-      await this.repo.insert(newUser);
+      await this.repo.save(newUser);
 
       return newUser;
     } catch (err) {

@@ -1,3 +1,5 @@
+import * as entities from 'entities';
+
 export type CheckTokenResponseSuccess = {
   scope: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   exp: number;
@@ -13,3 +15,5 @@ export type CheckTokenResponseFailed = {
 }
 
 export type CheckTokenResponse = CheckTokenResponseSuccess | CheckTokenResponseFailed;
+
+export type CreateUserBody = Omit<entities.User, 'createdAt' | 'updatedAt' | 'applicationMessages'>;

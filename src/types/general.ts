@@ -2,7 +2,8 @@ import { Repository } from 'typeorm';
 import * as entities from 'entities';
 
 export type Repositories = {
-  [R in keyof typeof entities]: Repository<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  user: Repository<entities.User>;
+  applicationmessage: Repository<entities.ApplicationMessage>;
 }
 
 export enum AUTH_LEVEL {

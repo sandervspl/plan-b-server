@@ -69,11 +69,12 @@ export default class AuthService {
               .redirect(this.failRedirect('server'));
           } else {
             try {
-              // Create user if needed
+              // Create/update user
               await this.userService.create({
                 id: user.id,
-                authLevel: this.getAuthLevel(user.id),
                 username: this.getGuildMember(user.id)!.displayName,
+                avatar: this.getAvatar(user.id, user.avatar),
+                authLevel: this.getAuthLevel(user.id),
                 dkp: 0,
               });
 

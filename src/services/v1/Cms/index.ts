@@ -1,12 +1,11 @@
 import * as i from 'types';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
+import Database from 'database';
 import config from 'config/apiconfig';
 
 @Injectable()
 export default class CmsService {
-  constructor() {}
-
   public page = async (pagePath: string) => {
     try {
       const res = await fetch(`${config.cmsDomain}/${pagePath}`);
@@ -64,7 +63,18 @@ export default class CmsService {
       const res = await fetch(`${config.cmsDomain}/applications/${id}`);
       const data: i.ApplicationData = await res.json();
 
-      return this.generateApplicationBody(data);
+      const discussionMessages = await Database.repos.applicationmessage.find({
+        applicationId: id,
+        // @ts-ignore this is allowed
+        relations: ['user'],
+      });
+
+      const applicationBody = this.generateApplicationBody(data);
+
+      return {
+        ...applicationBody,
+        discussion: discussionMessages,
+      };
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
