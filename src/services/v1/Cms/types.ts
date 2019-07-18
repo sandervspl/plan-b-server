@@ -2,8 +2,13 @@ import * as i from 'types';
 
 export type BaseResponseBody = {
   id: number;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AddApplicationCommentBody = {
+  userId: string;
+  comment: string;
 }
 
 export type Image = {

@@ -1,4 +1,5 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import * as i from 'types';
+import { Controller, Get, Param, UseGuards, Post, Body } from '@nestjs/common';
 import CmsService from 'services/v1/Cms';
 import { AdminGuard } from 'guards/auth';
 import { NewsItemParam, ApplicationsParam, SingleApplicationParam } from './types';
@@ -49,5 +50,13 @@ export default class CmsController {
   @UseGuards(AdminGuard)
   private async singleApplication(@Param() param: SingleApplicationParam) {
     return this.cmsService.singleApplication(param.id);
+  }
+
+  @Post('/application/:id/comment')
+  @UseGuards(AdminGuard)
+  private async addApplicationComment(
+    @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationCommentBody
+  ) {
+    return this.cmsService.addApplicationComment(param.id, body);
   }
 }

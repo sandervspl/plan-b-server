@@ -2,7 +2,9 @@ import * as i from 'types';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
 import Database from 'database';
+import * as entities from 'entities';
 import config from 'config/apiconfig';
+import { sortByDate } from 'helpers';
 
 @Injectable()
 export default class CmsService {
@@ -48,7 +50,7 @@ export default class CmsService {
         // Filter out applications with requested status
         .filter((app) => app.status === status)
         // Sort by date, descending
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .sort((a, b) => sortByDate('desc')(a.created_at, b.created_at))
         // Fix data response
         .map(this.generateApplicationBody);
 
@@ -63,18 +65,34 @@ export default class CmsService {
       const res = await fetch(`${config.cmsDomain}/applications/${id}`);
       const data: i.ApplicationData = await res.json();
 
-      const discussionMessages = await Database.repos.applicationmessage.find({
+      const discussionMessages: entities.ApplicationMessage[] = await Database.repos.applicationmessage.find({
         applicationId: id,
         // @ts-ignore this is allowed
         relations: ['user'],
       });
 
       const applicationBody = this.generateApplicationBody(data);
+      const sortedMessages = discussionMessages.sort((a, b) => sortByDate('desc')(a.createdAt, b.createdAt));
 
       return {
         ...applicationBody,
-        discussion: discussionMessages,
+        discussion: sortedMessages,
       };
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
+  public addApplicationComment = async (applicationId: number, body: i.AddApplicationCommentBody) => {
+    try {
+      const newComment = new entities.ApplicationMessage();
+      newComment.applicationId = applicationId;
+      newComment.text = body.comment;
+      newComment.user = await Database.repos.user.findOneOrFail(body.userId);
+
+      Database.repos.applicationmessage.save(newComment);
+
+      return newComment;
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }

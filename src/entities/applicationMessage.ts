@@ -25,10 +25,10 @@ class ApplicationMessage {
   text!: string;
 
   @CreateDateColumn()
-  createdAt!: Date;
+  createdAt!: string;
 
   @UpdateDateColumn()
-  updatedAt!: Date;
+  updatedAt!: string;
 }
 
 export default ApplicationMessage;
