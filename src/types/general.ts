@@ -4,9 +4,13 @@ import * as entities from 'entities';
 export type Repositories = {
   user: Repository<entities.User>;
   applicationmessage: Repository<entities.ApplicationMessage>;
+  applicationvote: Repository<entities.ApplicationVote>;
 }
 
 export enum AUTH_LEVEL {
   USER,
-  ADMIN,
+  OFFICER,
+  GUILD_MASTER
 }
+
+export enum VOTE { REJECT, ACCEPT }

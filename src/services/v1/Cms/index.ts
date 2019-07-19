@@ -1,6 +1,7 @@
 import * as i from 'types';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
+import _ from 'lodash';
 import Database from 'database';
 import * as entities from 'entities';
 import config from 'config/apiconfig';
@@ -65,7 +66,7 @@ export default class CmsService {
       const res = await fetch(`${config.cmsDomain}/applications/${id}`);
       const data: i.ApplicationData = await res.json();
 
-      const discussionMessages: entities.ApplicationMessage[] = await Database.repos.applicationmessage.find({
+      let discussionMessages: entities.ApplicationMessage[] = await Database.repos.applicationmessage.find({
         where: {
           applicationId: id,
         },
@@ -75,11 +76,32 @@ export default class CmsService {
         },
       });
 
+      discussionMessages = discussionMessages.map((msg) => ({
+        ...msg,
+        user: this.getPublicUser(msg.user),
+      }));
+
+      let votes: entities.ApplicationVote[] = await Database.repos.applicationvote.find({
+        where: {
+          applicationId: id,
+        },
+        relations: ['user'],
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      votes = votes.map((vote) => ({
+        ...vote,
+        user: this.getPublicUser(vote.user),
+      }));
+
       const applicationBody = this.generateApplicationBody(data);
 
       return {
         ...applicationBody,
         discussion: discussionMessages,
+        votes,
       };
     } catch (err) {
       throw new InternalServerErrorException(null, err);
@@ -93,14 +115,49 @@ export default class CmsService {
       newComment.text = body.comment;
       newComment.user = await Database.repos.user.findOneOrFail(body.userId);
 
-      const responseComment = await Database.repos.applicationmessage.save(newComment);
+      const savedComment = await Database.repos.applicationmessage.save(newComment);
 
-      return responseComment;
+      const response = {
+        ...savedComment,
+        user: this.getPublicUser(savedComment.user),
+      };
+
+      return response;
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
   }
 
+  public addApplicationVote = async (applicationId: number, body: i.AddApplicationVoteBody) => {
+    try {
+      const newVote = new entities.ApplicationVote();
+      newVote.applicationId = applicationId;
+      newVote.vote = body.vote;
+      newVote.user = await Database.repos.user.findOneOrFail(body.userId);
+
+      const savedVote = await Database.repos.applicationvote.save(newVote);
+
+      const response = {
+        ...savedVote,
+        user: this.getPublicUser(savedVote.user),
+      };
+
+      return response;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
+
+  private getPublicUser = (user: entities.User) => {
+    const safeData: (keyof typeof user)[] = [
+      'id',
+      'username',
+      'avatar',
+    ];
+
+    return _.pick(user, safeData);
+  }
 
   private cleanupMeta = (data: i.Pages) => {
     if ('meta' in data) {

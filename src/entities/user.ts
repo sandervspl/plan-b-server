@@ -2,6 +2,8 @@ import {
   Entity, CreateDateColumn, UpdateDateColumn, PrimaryColumn, Column, OneToMany,
 } from 'typeorm';
 import ApplicationMessage from './applicationMessage';
+import ApplicationVote from './applicationVote';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 @Entity()
 class User {
@@ -35,6 +37,9 @@ class User {
 
   @OneToMany((type) => ApplicationMessage, (message) => message.user)
   applicationMessages!: ApplicationMessage[];
+
+  @OneToMany((type) => ApplicationVote, (vote) => vote.user)
+  applicationVotes!: ApplicationVote[];
 
   @CreateDateColumn()
   createdAt!: Date;

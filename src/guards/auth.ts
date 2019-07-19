@@ -10,7 +10,7 @@ export class AdminGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req: Request = context.switchToHttp().getRequest();
 
-    if (!req.session || req.session.authLevel !== i.AUTH_LEVEL.ADMIN) {
+    if (!req.session || req.session.authLevel < i.AUTH_LEVEL.OFFICER) {
       throw new UnauthorizedException();
     }
 

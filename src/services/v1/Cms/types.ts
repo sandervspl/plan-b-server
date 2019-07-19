@@ -11,6 +11,11 @@ export type AddApplicationCommentBody = {
   comment: string;
 }
 
+export type AddApplicationVoteBody = {
+  userId: string;
+  vote: i.VOTE;
+}
+
 export type Image = {
   id: number;
   name: string;

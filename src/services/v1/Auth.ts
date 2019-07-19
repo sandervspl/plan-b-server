@@ -182,14 +182,13 @@ export default class AuthService {
 
   private getAuthLevel = (memberId: string): i.AUTH_LEVEL => {
     if (this.userIsAdmin(memberId)) {
-      return i.AUTH_LEVEL.ADMIN;
+      return i.AUTH_LEVEL.OFFICER;
     }
 
     return i.AUTH_LEVEL.USER;
   }
 
   private setAuthLevel = (req: Request, userId: string) => {
-    // @TODO store in db
     if (req.session) {
       req.session.authLevel = this.getAuthLevel(userId);
     }

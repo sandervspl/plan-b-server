@@ -59,4 +59,12 @@ export default class CmsController {
   ) {
     return this.cmsService.addApplicationComment(param.id, body);
   }
+
+  @Post('/application/:id/vote')
+  @UseGuards(AdminGuard)
+  private async addApplicationVote(
+    @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationVoteBody
+  ) {
+    return this.cmsService.addApplicationVote(param.id, body);
+  }
 }
