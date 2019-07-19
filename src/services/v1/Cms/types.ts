@@ -16,6 +16,10 @@ export type AddApplicationVoteBody = {
   vote: i.VOTE;
 }
 
+export type UpdateApplicationStatusBody = {
+  status: i.ApplicationStatus;
+}
+
 export type Image = {
   id: number;
   name: string;

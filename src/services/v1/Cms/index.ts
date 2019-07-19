@@ -148,6 +148,25 @@ export default class CmsService {
     }
   }
 
+  public updateApplicationStatus = async (applicationId: number, body: i.UpdateApplicationStatusBody) => {
+    try {
+      const response = await fetch(`${config.cmsDomain}/applications/${applicationId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          status: body.status,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const updatedApplication = await response.json();
+
+      return updatedApplication;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
 
   private getPublicUser = (user: entities.User) => {
     const safeData: (keyof typeof user)[] = [

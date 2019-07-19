@@ -1,5 +1,5 @@
 import * as i from 'types';
-import { Controller, Get, Param, UseGuards, Post, Body } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Post, Body, Put } from '@nestjs/common';
 import CmsService from 'services/v1/Cms';
 import { AdminGuard } from 'guards/auth';
 import { NewsItemParam, ApplicationsParam, SingleApplicationParam } from './types';
@@ -66,5 +66,13 @@ export default class CmsController {
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationVoteBody
   ) {
     return this.cmsService.addApplicationVote(param.id, body);
+  }
+
+  @Put('/application/:id/status')
+  @UseGuards(AdminGuard)
+  private async updateApplicationStatus(
+    @Param() param: SingleApplicationParam, @Body() body: i.UpdateApplicationStatusBody
+  ) {
+    return this.cmsService.updateApplicationStatus(param.id, body);
   }
 }
