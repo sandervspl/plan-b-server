@@ -121,7 +121,11 @@ export default class AuthService {
     }
 
     // Set auth level for this session's user
-    this.setAuthLevel(req, user.id);
+    if (!dbUser) {
+      this.setAuthLevel(req, user.id);
+    } {
+      req.user.authLevel = dbUser.authLevel;
+    }
 
     const publicUser = this.getPublicUser(user);
 
@@ -133,7 +137,7 @@ export default class AuthService {
       username: guildMember.displayName,
 
       // Set auth level for rendering specific parts of the UI
-      authLevel: this.getAuthLevel(user.id),
+      authLevel: dbUser ? dbUser.authLevel : this.getAuthLevel(user.id),
 
       // Overwrite avatar hash with a generated avatar url
       avatar: this.getAvatar(user.id, user.avatar),
