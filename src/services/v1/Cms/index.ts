@@ -159,9 +159,9 @@ export default class CmsService {
           'Content-Type': 'application/json',
         },
       });
-      const updatedApplication = await response.json();
+      const updatedApplication: i.ApplicationData = await response.json();
 
-      return updatedApplication;
+      return this.generateApplicationBody(updatedApplication);
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
