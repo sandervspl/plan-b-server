@@ -66,17 +66,20 @@ export default class CmsService {
       const data: i.ApplicationData = await res.json();
 
       const discussionMessages: entities.ApplicationMessage[] = await Database.repos.applicationmessage.find({
-        applicationId: id,
-        // @ts-ignore this is allowed
+        where: {
+          applicationId: id,
+        },
         relations: ['user'],
+        order: {
+          createdAt: 'DESC',
+        },
       });
 
       const applicationBody = this.generateApplicationBody(data);
-      const sortedMessages = discussionMessages.sort((a, b) => sortByDate('desc')(a.createdAt, b.createdAt));
 
       return {
         ...applicationBody,
-        discussion: sortedMessages,
+        discussion: discussionMessages,
       };
     } catch (err) {
       throw new InternalServerErrorException(null, err);
@@ -90,9 +93,9 @@ export default class CmsService {
       newComment.text = body.comment;
       newComment.user = await Database.repos.user.findOneOrFail(body.userId);
 
-      Database.repos.applicationmessage.save(newComment);
+      const responseComment = await Database.repos.applicationmessage.save(newComment);
 
-      return newComment;
+      return responseComment;
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }

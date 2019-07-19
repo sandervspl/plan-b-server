@@ -1,4 +1,6 @@
-import { Entity, CreateDateColumn, UpdateDateColumn, PrimaryColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity, CreateDateColumn, UpdateDateColumn, PrimaryColumn, Column, OneToMany,
+} from 'typeorm';
 import ApplicationMessage from './applicationMessage';
 
 @Entity()

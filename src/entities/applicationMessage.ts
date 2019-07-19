@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  Entity, CreateDateColumn, UpdateDateColumn, Column, JoinColumn, PrimaryGeneratedColumn, OneToMany, ManyToOne,
+  Entity, CreateDateColumn, UpdateDateColumn, Column, PrimaryGeneratedColumn, ManyToOne,
 } from 'typeorm';
 import User from './user';
 
