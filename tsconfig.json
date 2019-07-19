@@ -19,7 +19,7 @@
             "helpers/*": ["helpers/*"],
             "services/*": ["services/*"],
             "modules/*": ["modules/*"],
-            "database/*": ["Database.ts"],
+            "database/*": ["database/index"],
             "types/*": ["types/*"]
         },
         "lib": ["esnext"]
