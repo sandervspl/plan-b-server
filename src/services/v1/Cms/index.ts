@@ -6,6 +6,7 @@ import Database from 'database';
 import * as entities from 'entities';
 import config from 'config/apiconfig';
 import { sortByDate } from 'helpers';
+import { In } from 'typeorm';
 
 @Injectable()
 export default class CmsService {
@@ -47,7 +48,7 @@ export default class CmsService {
       const res = await fetch(`${config.cmsDomain}/applications`);
       const data: i.ApplicationData[] = await res.json();
 
-      const modData = data
+      const applications = data
         // Filter out applications with requested status
         .filter((app) => app.status === status)
         // Sort by date, descending
@@ -55,7 +56,18 @@ export default class CmsService {
         // Fix data response
         .map(this.generateApplicationBody);
 
-      return modData;
+      const comments = await Database.repos.applicationmessage.find({
+        where: {
+          applicationId: In(applications.map((app) => app.id)),
+        },
+      });
+
+      const response = applications.map((app) => ({
+        ...app,
+        commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
+      }));
+
+      return response;
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
