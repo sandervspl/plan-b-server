@@ -166,6 +166,7 @@ export default class CmsService {
         method: 'PUT',
         body: JSON.stringify({
           status: body.status,
+          locked: body.status !== 'open',
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -205,6 +206,7 @@ export default class CmsService {
       created_at: application.created_at,
       updated_at: application.updated_at,
       status: application.status,
+      locked: application.locked,
       character: {
         name: application.char_name,
         level: application.char_level,

@@ -113,6 +113,7 @@ export type ApplicationData = i.BaseResponseBody & {
   status: i.ApplicationStatus;
   char_raid_experience: CharRaidExperience;
   class: i.Class;
+  locked: boolean;
 }
 
 
