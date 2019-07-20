@@ -56,6 +56,10 @@ export default class CmsService {
         // Fix data response
         .map(this.generateApplicationBody);
 
+      if (applications.length === 0) {
+        return [];
+      }
+
       const comments = await Database.repos.applicationmessage.find({
         where: {
           applicationId: In(applications.map((app) => app.id)),
