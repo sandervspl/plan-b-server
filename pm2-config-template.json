@@ -1,6 +1,6 @@
 {
   "apps": [{
-    "name": "api.planbguild.eu",
+    "name": "NAME",
     "script": "/var/api/PROJECT/dist/Server.js",
     "node_args": "-r ./tsconfig-paths-bootstrap.js",
     "cwd": "/var/api/PROJECT",

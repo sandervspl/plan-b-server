@@ -1,50 +1,24 @@
 #!/bin/bash
-PROJECT='planbguild.eu'
+PROJECT='api.planbguild.eu'
 
 ROOT_USER=root
 
 TEST_HOST=134.209.85.102
 TEST_USER=sandervspl
+TEST_PORT=4000
 
-TEST_PORT=3002
-
-ACC_HOST=
+ACC_HOST=134.209.85.102
 ACC_USER=sandervspl
+ACC_PORT=4001
 
 PROD_HOST=134.209.85.102
 PROD_USER=sandervspl
+PROD_PORT=4002
 
 #Don't touch this
 ENV=$1
 
 #!/bin/bash
-if [ -z "$PROD_USER" ]; then
-    PROD_USER=sandervspl
-fi
-
-if [ -z "$ACC_USER" ]; then
-    ACC_USER=sandervspl
-fi
-
-if [ -z "$TEST_HOST" ]; then
-    TEST_HOST=134.209.85.102
-fi
-
-if [ -z "$TEST_USER" ]; then
-    TEST_USER=sandervspl
-fi
-
-if [ -z "$ROOT_USER" ]; then
-    ROOT_USER=root
-fi
-
-if [ -z "$ACC_PORT" ]; then
-    ACC_PORT=3002
-fi
-
-if [ -z "$PROD_PORT" ]; then
-    PROD_PORT=3002
-fi
 
 #Environment switch
 if [ "$1" = PROD ]; then
@@ -59,14 +33,14 @@ elif [ "$1" = ACC ]; then
     PORT=$ACC_PORT
     USER=$ACC_USER
     HOST=$ACC_HOST
-    PROJECT='api.planbguild.eu'
-    INSTANCES=0
+    PROJECT='api-acc.planbguild.eu'
+    INSTANCES=1
 elif [ "$1" = TEST ]; then
     APP_ENV=test
     PORT=$TEST_PORT
     USER=$TEST_USER
     HOST=$TEST_HOST
-    PROJECT='api.planbguild.eu'
+    PROJECT='api-test.planbguild.eu'
     INSTANCES=1
 fi
 
@@ -138,7 +112,7 @@ APP_ENV=$APP_ENV npm run build
 
 #Create PM2 config file
 echo -e "⚡️ $c Generating PM2 server file $nc"
-sed "s/port/$PORT/g; s/app_env/$APP_ENV/g; s/PROJECT/$PROJECT-$VERSION/g; s/INSTANCES/$INSTANCES/g"  ./pm2-config-template.json > $PM2_CONFIG_NAME
+sed "s/NAME/$PROJECT/g; s/port/$PORT/g; s/app_env/$APP_ENV/g; s/PROJECT/$PROJECT-$VERSION/g; s/INSTANCES/$INSTANCES/g"  ./pm2-config-template.json > $PM2_CONFIG_NAME
 
 #Build tar and copy to server
 echo -e "🚚 $c Copying files to server $nc"

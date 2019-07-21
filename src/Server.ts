@@ -63,13 +63,6 @@ async function bootstrap() {
 
   // @ts-ignore this works
   const MysqlStore = mysqlSession(session);
-  const mysqlCfg = {
-    host: 'localhost',
-    port: 3306,
-    user: 'sandervspl',
-    password: 'soulfly64',
-    database: 'planb',
-  };
 
   const sessionName = 'plan-b-auth';
   const sessionCfg: SessionOptions = {
@@ -81,7 +74,7 @@ async function bootstrap() {
     cookie: {
       secure: isProd,
     },
-    store: new MysqlStore(mysqlCfg),
+    store: new MysqlStore(secretConfig.databaseInfo),
   };
 
   app.use(session(sessionCfg));
@@ -89,7 +82,9 @@ async function bootstrap() {
   app.use(passport.session());
 
   await app.listen(apiConfig.port, () => {
-    console.info(`[${process.env.NODE_ENV}] API server started on localhost:${apiConfig.port}`);
+    console.info(
+      `[${process.env.NODE_ENV} / ${process.env.APP_ENV}] Server started on port ${apiConfig.port}`
+    );
   });
 }
 

@@ -3,6 +3,19 @@ class Config {
   public readonly port = Number(process.env.PORT) || 8080;
   public readonly domain = process.env.NODE_ENV ? 'localhost' : process.env.PUBLIC_URL;
 
+  public get apiDomain() {
+    switch (process.env.APP_ENV) {
+      case 'test':
+        return 'https://api-test.planbguild.eu';
+      case 'acceptation':
+        return 'https://api-acc.planbguild.eu';
+      case 'production':
+        return 'https://planbguild.eu';
+      default:
+        return 'http://localhost:8080';
+    }
+  }
+
   public get websiteDomain() {
     switch (process.env.APP_ENV) {
       case 'test':
@@ -19,10 +32,13 @@ class Config {
   public get cmsDomain() {
     switch (process.env.APP_ENV) {
       case 'test':
+        return 'https://cms-test.planbguild.eu';
       case 'acceptation':
+        return 'https://cms-acc.planbguild.eu';
       case 'production':
-      default:
         return 'https://cms.planbguild.eu';
+      default:
+        return 'https://cms-test.planbguild.eu';
     }
   }
 
