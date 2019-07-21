@@ -28,6 +28,11 @@ export default class CmsService {
       const res = await fetch(`${config.cmsDomain}/posts/${newsItemId}`);
       const data: i.NewsDetailpage = await res.json();
 
+      const allPostsRes = await fetch(`${config.cmsDomain}/posts`);
+      const allPosts: i.NewsDetailpage[] = await allPostsRes.json();
+
+      const relatedNews: i.NewsDetailpage[] = [];
+
       delete data.homepage;
 
       if ('tags' in data) {
@@ -35,9 +40,42 @@ export default class CmsService {
           delete tag.created_at;
           delete tag.updated_at;
         });
+
+        const newsDetailTagIds = data.tags!.map((tag) => tag.id);
+
+        allPosts.forEach((post) => {
+          // Skip same post
+          if (post.id === data.id) {
+            return;
+          }
+
+          if (post.tags) {
+            const tagIds = post.tags.map((tag) => tag.id);
+
+            tagIds.forEach((tag) => {
+              if (newsDetailTagIds.includes(tag)) {
+                relatedNews.push(post);
+              }
+            });
+          }
+        });
       }
 
-      return data;
+      // const MAX_RELATED_NEWS = 3;
+
+      // if (relatedNews.length < MAX_RELATED_NEWS) {
+      //   const diff = MAX_RELATED_NEWS - relatedNews.length;
+
+      //   // @TODO filter same post(s) from allPosts before slice
+      //   relatedNews = relatedNews.concat(
+      //     allPosts.slice(0, diff)
+      //   );
+      // }
+
+      return {
+        ...data,
+        relatedNews,
+      };
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
