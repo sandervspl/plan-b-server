@@ -16,4 +16,10 @@ export type CheckTokenResponseFailed = {
 
 export type CheckTokenResponse = CheckTokenResponseSuccess | CheckTokenResponseFailed;
 
-export type CreateUserBody = Omit<entities.User, 'createdAt' | 'updatedAt' | 'applicationMessages'>;
+export type CreateUserBody = Omit<
+entities.User,
+| 'createdAt'
+| 'updatedAt'
+| 'applicationMessages'
+| 'applicationVotes'
+>;
