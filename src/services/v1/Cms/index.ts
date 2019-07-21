@@ -1,7 +1,8 @@
 import * as i from 'types';
+import _ from 'lodash';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
-import _ from 'lodash';
+
 import Database from 'database';
 import * as entities from 'entities';
 import config from 'config/apiconfig';
@@ -28,49 +29,37 @@ export default class CmsService {
       const res = await fetch(`${config.cmsDomain}/posts/${newsItemId}`);
       const data: i.NewsDetailpage = await res.json();
 
-      const allPostsRes = await fetch(`${config.cmsDomain}/posts`);
-      const allPosts: i.NewsDetailpage[] = await allPostsRes.json();
-
-      const relatedNews: i.NewsDetailpage[] = [];
-
+      // Delete reference
       delete data.homepage;
 
-      if ('tags' in data) {
-        data.tags!.forEach((tag) => {
-          delete tag.created_at;
-          delete tag.updated_at;
-        });
+      const allPostsRes = await fetch(`${config.cmsDomain}/posts`);
+      let allPosts: i.NewsDetailpage[] = await allPostsRes.json();
 
+      // Filter out requested article
+      allPosts = allPosts.filter((post) => post.id !== data.id);
+
+      let relatedNews: i.NewsDetailpage[] = [];
+
+      if ('tags' in data) {
         const newsDetailTagIds = data.tags!.map((tag) => tag.id);
 
-        allPosts.forEach((post) => {
-          // Skip same post
-          if (post.id === data.id) {
-            return;
+        // Get all posts with intersection tag IDs
+        relatedNews = allPosts.filter((post) => {
+          if (!post.tags) return false;
+
+          const postTagIds = post.tags.map((tag) => tag.id);
+
+          // Check if there are related tags on this post
+          const intersections = _.intersection(newsDetailTagIds, postTagIds);
+
+          // Found a post with similar tags
+          if (intersections.length > 0) {
+            return true;
           }
 
-          if (post.tags) {
-            const tagIds = post.tags.map((tag) => tag.id);
-
-            tagIds.forEach((tag) => {
-              if (newsDetailTagIds.includes(tag)) {
-                relatedNews.push(post);
-              }
-            });
-          }
+          return false;
         });
       }
-
-      // const MAX_RELATED_NEWS = 3;
-
-      // if (relatedNews.length < MAX_RELATED_NEWS) {
-      //   const diff = MAX_RELATED_NEWS - relatedNews.length;
-
-      //   // @TODO filter same post(s) from allPosts before slice
-      //   relatedNews = relatedNews.concat(
-      //     allPosts.slice(0, diff)
-      //   );
-      // }
 
       return {
         ...data,
