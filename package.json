@@ -1,6 +1,6 @@
 {
   "name": "plan-b-server",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Code for plan-b-server.",
   "main": "src/Server.js",
   "scripts": {
