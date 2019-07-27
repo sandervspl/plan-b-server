@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import TwitchService from 'services/v1/Twitch';
 
 @Controller('twitch')
-export default class CharacterController {
+export default class TwitchController {
   constructor(
     private readonly twitchService: TwitchService,
   ) {}
