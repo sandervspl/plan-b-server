@@ -12,6 +12,12 @@ class Streamer {
     type: 'varchar',
   })
   twitch_name!: string;
+
+  @Column({
+    type: 'tinyint',
+    default: 1,
+  })
+  enabled!: boolean;
 }
 
 export default Streamer;
