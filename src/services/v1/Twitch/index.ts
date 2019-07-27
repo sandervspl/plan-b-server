@@ -19,7 +19,11 @@ export default class TwitchService extends Service<entities.Streamer> {
 
   public streamers = async () => {
     try {
-      const streamers = await this.repo.find();
+      const streamers = await this.repo.find({
+        where: {
+          enabled: 1,
+        },
+      });
 
       if (!streamers) {
         throw new NotFoundException();
