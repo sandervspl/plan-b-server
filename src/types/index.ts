@@ -4,6 +4,8 @@ export * from './general';
 
 export * from 'config/types';
 
+export * from 'entities/types';
+
 export * from 'controllers/types';
 
 export * from 'services/v1/types';

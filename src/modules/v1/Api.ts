@@ -3,6 +3,7 @@ import BlizzardModule from 'modules/v1/Blizzard';
 import AuthModule from 'modules/v1/Auth';
 import CmsModule from 'modules/v1/Cms';
 import UserModule from 'modules/v1/User';
+import TwitchModule from './Twitch';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import UserModule from 'modules/v1/User';
     AuthModule,
     CmsModule,
     UserModule,
+    TwitchModule,
   ],
 })
 export default class ApplicationModule {}

@@ -17,6 +17,9 @@ export interface SecretInfo {
     botToken: string;
     planBServerId: string;
   };
+  readonly twitch: {
+    privateKey: string;
+  };
 }
 
 export interface Oauth2Info {

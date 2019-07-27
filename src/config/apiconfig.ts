@@ -54,6 +54,7 @@ class Config {
   public readonly blizzardApiUrl = 'https://eu.api.blizzard.com';
   public readonly discordApiUrl = 'https://discordapp.com/api';
   public readonly discordCdnUrl = 'https://cdn.discordapp.com';
+  public readonly twitchApiUrl = 'https://api.twitch.tv/helix';
 }
 
 const config = new Config();

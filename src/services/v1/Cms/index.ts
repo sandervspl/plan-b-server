@@ -230,7 +230,6 @@ export default class CmsService {
     }
   }
 
-  /* eslint-disable @typescript-eslint/camelcase */
   private generateApplicationBody = (application: i.ApplicationData) => {
     return {
       id: application.id,
