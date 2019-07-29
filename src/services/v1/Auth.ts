@@ -9,36 +9,28 @@ import discordConfig from 'config/discord';
 import apiConfig from 'config/apiconfig';
 import secretConfig from 'config/secret';
 import UserService from 'services/v1/User';
+import discordBot from 'bot/Discord';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExpressParamsFn = (req: Request, res: Response, next: NextFunction) => any;
 
 @Injectable()
 export default class AuthService {
-  private discordClient: Discord.Client;
   private guild?: Discord.Guild;
 
   constructor(
     private readonly userService: UserService,
   ) {
-    this.discordClient = new Discord.Client();
-    this.discordClient.login(secretConfig.discord.botToken);
-
-    this.discordClient.on('ready', () => {
-      console.info('Discord bot activated.');
-
-      this.guild = this.discordClient.guilds.get(secretConfig.discord.planBServerId);
+    discordBot.client.on('ready', () => {
+      this.guild = discordBot.client.guilds.get(secretConfig.discord.planBServerId);
     });
   }
 
   public auth: ExpressParamsFn = (req, res, next) => {
-    const fn = passport.authenticate(
-      'discord',
-      {
-        scope: discordConfig.scopes,
-        failureRedirect: this.failRedirect(),
-      }
-    );
+    const fn = passport.authenticate('discord', {
+      scope: discordConfig.scopes,
+      failureRedirect: this.failRedirect(),
+    });
 
     fn(req, res, next);
   }

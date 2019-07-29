@@ -12,6 +12,7 @@
         "strict": true,
         "baseUrl": "src",
         "paths": {
+            "bot/*": ["bot/*"],
             "config/*": ["config/*"],
             "controllers/*": ["controllers/*"],
             "entities/*": ["entities/*"],
