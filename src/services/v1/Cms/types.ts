@@ -42,6 +42,11 @@ export type Class = i.BaseResponseBody & {
   icon: i.Image;
 }
 
+export type Race = i.BaseResponseBody & {
+  name: string;
+  icon: i.Image;
+}
+
 export type Meta = {
   id: number;
   title: string;
@@ -106,7 +111,7 @@ export type ApplicationData = i.BaseResponseBody & {
   char_secondary_proff_3_level?: number;
   char_server: string;
   characterrole: i.Role;
-  char_race: string;
+  race: i.Race;
   name: string;
   age: number;
   story: string;
