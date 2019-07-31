@@ -46,6 +46,7 @@ export default class CmsService {
         // Get all posts with intersection tag IDs
         relatedNews = allPosts.filter((post) => {
           if (!post.tags) return false;
+          if (!post.published) return false;
 
           const postTagIds = post.tags.map((tag) => tag.id);
 
@@ -240,7 +241,7 @@ export default class CmsService {
       character: {
         name: application.char_name,
         level: application.char_level,
-        race: application.char_race,
+        race: application.race,
         class: application.class,
         role: application.characterrole,
         server: application.char_server,
