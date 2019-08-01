@@ -7,6 +7,7 @@ import * as entities from 'entities';
 import config from 'config/apiconfig';
 import { sortByDate } from 'helpers';
 import { In } from 'typeorm';
+import { PrimaryProfession } from './types/AddApplicationRequestBody';
 
 @Injectable()
 export default class CmsService {
@@ -193,10 +194,18 @@ export default class CmsService {
   }
 
   public addApplication = async (body: i.AddApplicationRequestBody) => {
-    const professions = [
-      ...body.professions.primary.map((proff) => proff),
-      ...body.professions.secondary.map((proff) => proff),
-    ];
+    let professions: PrimaryProfession[] = [];
+
+    if (body.professions) {
+      if (body.professions.primary) {
+        professions = [...body.professions.primary];
+      }
+
+      if (body.professions.secondary) {
+        professions = [...professions, ...body.professions.secondary];
+      }
+    }
+
     const professionIds = professions.map((proff) => proff.id);
 
     const postBody: i.CmsApplicationBody = {

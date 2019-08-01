@@ -19,8 +19,8 @@ export type SecondaryProfession = {
 }
 
 export type Professions = {
-  primary: PrimaryProfession[];
-  secondary: SecondaryProfession[];
+  primary?: PrimaryProfession[];
+  secondary?: SecondaryProfession[];
 }
 
 export type Personal = {
@@ -32,7 +32,7 @@ export type Personal = {
 
 export type AddApplicationRequestBody = {
   character: Character;
-  professions: Professions;
+  professions?: Professions;
   role: string;
   raid_experience: i.RaidExperience;
   personal: Personal;
