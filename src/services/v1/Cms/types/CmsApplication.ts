@@ -11,6 +11,12 @@ export type Profession = i.BaseResponseBody & {
   icon: i.Image;
 }
 
+export type ApplicationProfessionDetail = i.BaseResponseBody & {
+  profession: number;
+  application: number;
+  level: number;
+}
+
 export type CmsApplicationBody = {
   char_name: string;
   char_level: number;
@@ -41,4 +47,5 @@ export type CmsApplicationResponse = i.BaseResponseBody & {
   reason: string;
   race: i.Race;
   professions: Profession[];
+  applicationprofessions: ApplicationProfessionDetail[];
 };

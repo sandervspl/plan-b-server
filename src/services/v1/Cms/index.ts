@@ -264,7 +264,7 @@ export default class CmsService {
           'Content-Type': 'application/json',
         },
       });
-      const updatedApplication: i.ApplicationData = await response.json();
+      const updatedApplication: i.CmsApplicationResponse = await response.json();
 
       return this.generateApplicationBody(updatedApplication);
     } catch (err) {
@@ -291,7 +291,15 @@ export default class CmsService {
     }
   }
 
-  private generateApplicationBody = (application: i.ApplicationData) => {
+  private generateApplicationBody = (application: i.CmsApplicationResponse) => {
+    const getProfessionLevel = (id: number) => {
+      const detail = application.applicationprofessions.find((proffDetail) => (
+        proffDetail.profession === id
+      ));
+
+      return detail ? detail.level : 0;
+    };
+
     return {
       id: application.id,
       created_at: application.created_at,
@@ -307,36 +315,29 @@ export default class CmsService {
         server: application.char_server,
         raidExperience: application.char_raid_experience,
         professions: {
-          primary: [
-            {
-              name: application.char_primary_proff_1,
-              level: application.char_primary_proff_1_level,
-            },
-            {
-              name: application.char_primary_proff_2,
-              level: application.char_primary_proff_2_level,
-            },
-          ],
-          secondary: [
-            {
-              name: application.char_secondary_proff_1,
-              level: application.char_secondary_proff_1_level,
-            },
-            {
-              name: application.char_secondary_proff_2,
-              level: application.char_secondary_proff_2_level,
-            },
-            {
-              name: application.char_secondary_proff_3,
-              level: application.char_secondary_proff_3_level,
-            },
-          ],
+          primary: application.professions
+            .filter((proff) => proff.primary)
+            .map((proff) => ({
+              id: proff.id,
+              icon: proff.icon,
+              name: proff.name,
+              level: getProfessionLevel(proff.id),
+            })),
+          secondary: application.professions
+            .filter((proff) => !proff.primary)
+            .map((proff) => ({
+              id: proff.id,
+              icon: proff.icon,
+              name: proff.name,
+              level: getProfessionLevel(proff.id),
+            })),
         },
       },
       personal: {
         name: application.name,
         age: application.age,
         story: application.story,
+        reason: application.reason,
       },
     };
   }
