@@ -52,6 +52,12 @@ export default class CmsController {
     return this.cmsService.singleApplication(param.id);
   }
 
+  @Post('/application/')
+  @UseGuards()
+  private async addApplication(@Body() body: i.AddApplicationRequestBody) {
+    return this.cmsService.addApplication(body);
+  }
+
   @Post('/application/:id/comment')
   @UseGuards(AdminGuard)
   private async addApplicationComment(

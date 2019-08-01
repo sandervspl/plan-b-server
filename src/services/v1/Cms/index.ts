@@ -2,7 +2,6 @@ import * as i from 'types';
 import _ from 'lodash';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
-
 import Database from 'database';
 import * as entities from 'entities';
 import config from 'config/apiconfig';
@@ -74,13 +73,14 @@ export default class CmsService {
   public applications = async (status: i.ApplicationStatus) => {
     try {
       const res = await fetch(`${config.cmsDomain}/applications`);
-      const data: i.ApplicationData[] = await res.json();
+      const data: i.CmsApplicationResponse[] = await res.json();
+      const sort = sortByDate('desc');
 
       const applications = data
         // Filter out applications with requested status
         .filter((app) => app.status === status)
         // Sort by date, descending
-        .sort((a, b) => sortByDate('desc')(a.created_at, b.created_at))
+        .sort((a, b) => sort(a.created_at, b.created_at))
         // Fix data response
         .map(this.generateApplicationBody);
 
@@ -108,7 +108,7 @@ export default class CmsService {
   public singleApplication = async (id: number) => {
     try {
       const res = await fetch(`${config.cmsDomain}/applications/${id}`);
-      const data: i.ApplicationData = await res.json();
+      const data: i.CmsApplicationResponse = await res.json();
 
       let discussionMessages: entities.ApplicationMessage[] = await Database.repos.applicationmessage.find({
         where: {
@@ -187,6 +187,66 @@ export default class CmsService {
       };
 
       return response;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
+  public addApplication = async (body: i.AddApplicationRequestBody) => {
+    const professions = [
+      ...body.professions.primary.map((proff) => proff),
+      ...body.professions.secondary.map((proff) => proff),
+    ];
+    const professionIds = professions.map((proff) => proff.id);
+
+    const postBody: i.CmsApplicationBody = {
+      age: Number(body.personal.age),
+      story: body.personal.story,
+      reason: body.personal.reason,
+      race: body.character.race,
+      professions: professionIds,
+      name: body.character.name,
+      class: body.character.class,
+      characterrole: body.role,
+      char_server: body.character.server,
+      char_raid_experience: body.raid_experience,
+      char_name: body.character.name,
+      char_level: body.character.level,
+    };
+
+    try {
+      const response = await fetch(`${config.cmsDomain}/applications`, {
+        method: 'POST',
+        body: JSON.stringify(postBody),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const application: i.CmsApplicationResponse = await response.json();
+
+      const applicationProfessionsRequests = professions.map((proff) => {
+        const appProffBody: i.ApplicationProfessionBody = {
+          application: application.id,
+          level: Number(proff.level),
+          profession: proff.id,
+        };
+
+        return new Promise((res) => (
+          fetch(`${config.cmsDomain}/applicationprofessions`, {
+            method: 'POST',
+            body: JSON.stringify(appProffBody),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+            .then((res) => res.json())
+            .then((data) => res(data))
+        ));
+      });
+
+      await Promise.all(applicationProfessionsRequests);
+
+      return {};
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
