@@ -43,6 +43,11 @@ export default class TwitchService extends Service<entities.Streamer> {
       });
       const activeStreams: i.ActiveStreamers = await streamsResponse.json();
 
+      // No streams are live
+      if (activeStreams.data.length === 0) {
+        return [];
+      }
+
       const publicActiveStreams = activeStreams.data.map((stream) => _.pick(
         stream,
         'id',
