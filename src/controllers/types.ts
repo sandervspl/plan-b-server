@@ -1,3 +1,5 @@
+export { MessageType } from './v1/Recruitment/types';
+
 export type UserData = {
   username: string;
   locale: string;

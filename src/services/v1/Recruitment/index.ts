@@ -45,27 +45,12 @@ export default class RecruitmentService {
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
-  };
+  }
 
   public singleApplication = async (id: number) => {
     try {
       const res = await fetch(`${config.cmsDomain}/applications/${id}`);
       const data: i.CmsApplicationResponse = await res.json();
-
-      let discussionMessages: entities.ApplicationMessage[] = await Database.repos.applicationmessage.find({
-        where: {
-          applicationId: id,
-        },
-        relations: ['user'],
-        order: {
-          createdAt: 'DESC',
-        },
-      });
-
-      discussionMessages = discussionMessages.map((msg) => ({
-        ...msg,
-        user: this.getPublicUser(msg.user),
-      }));
 
       let votes: entities.ApplicationVote[] = await Database.repos.applicationvote.find({
         where: {
@@ -86,7 +71,6 @@ export default class RecruitmentService {
 
       return {
         ...applicationBody,
-        discussion: discussionMessages,
         votes,
       };
     } catch (err) {
@@ -114,7 +98,39 @@ export default class RecruitmentService {
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
-  };
+  }
+
+  public getMessages = async (applicationId: number, type: i.MessageType) => {
+    const messagesTypeQuery: Record<string, number> = {};
+
+    if (type === 'private') {
+      messagesTypeQuery.public = 0;
+    } else if (type === 'public') {
+      messagesTypeQuery.public = 1;
+    }
+
+    try {
+      let messages = await Database.repos.applicationmessage.find({
+        where: {
+          applicationId,
+          ...messagesTypeQuery,
+        },
+        relations: ['user'],
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      messages = messages.map((msg) => ({
+        ...msg,
+        user: this.getPublicUser(msg.user),
+      }));
+
+      return messages;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
 
   public addApplicationComment = async (applicationId: number, body: i.AddApplicationCommentBody) => {
     try {

@@ -1,8 +1,11 @@
 import * as i from 'types';
-import { Controller, Get, Post, Put, UseGuards, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, UseGuards, Param, Body, Query } from '@nestjs/common';
 import RecruitmentService from 'services/v1/Recruitment';
 import { AdminGuard } from 'guards/auth';
-import { ApplicationsParam, SingleApplicationParam, SinglePublicApplicationParam } from './types';
+import {
+  ApplicationsParam, SingleApplicationParam, SinglePublicApplicationParam, ApplicationMessagesParam,
+  ApplicationMessagesQuery,
+} from './types';
 
 @Controller('recruitment')
 export default class RecruitmentController {
@@ -31,6 +34,13 @@ export default class RecruitmentController {
   @Get('/application/public/:uuid')
   private async singlePublicApplication(@Param() param: SinglePublicApplicationParam) {
     return this.recruitmentService.singlePublicApplication(param.uuid);
+  }
+
+  @Get('/application/:id/messages')
+  private async getMessages(
+    @Param() param: ApplicationMessagesParam, @Query() query: ApplicationMessagesQuery
+  ) {
+    return this.recruitmentService.getMessages(param.id, query.type);
   }
 
   @Post('/application/:id/comment')
