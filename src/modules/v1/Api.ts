@@ -4,6 +4,7 @@ import AuthModule from 'modules/v1/Auth';
 import CmsModule from 'modules/v1/Cms';
 import UserModule from 'modules/v1/User';
 import TwitchModule from './Twitch';
+import RecruitmentModule from './Recruitment';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import TwitchModule from './Twitch';
     CmsModule,
     UserModule,
     TwitchModule,
+    RecruitmentModule,
   ],
 })
 export default class ApplicationModule {}
