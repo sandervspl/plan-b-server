@@ -6,6 +6,7 @@ export { CmsApplicationResponse, CmsApplicationBody } from './CmsApplication';
 export type AddApplicationCommentBody = {
   userId: string;
   comment: string;
+  isPublic: i.PUBLIC_MESSAGE;
 }
 
 export type AddApplicationVoteBody = {

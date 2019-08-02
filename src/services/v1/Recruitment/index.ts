@@ -121,6 +121,7 @@ export default class RecruitmentService {
       const newComment = new entities.ApplicationMessage();
       newComment.applicationId = applicationId;
       newComment.text = body.comment;
+      newComment.public = body.isPublic;
       newComment.user = await Database.repos.user.findOneOrFail(body.userId);
 
       const savedComment = await Database.repos.applicationmessage.save(newComment);

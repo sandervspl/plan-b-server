@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import * as i from 'types';
 import {
   Entity, CreateDateColumn, UpdateDateColumn, Column, PrimaryGeneratedColumn, ManyToOne,
 } from 'typeorm';
@@ -23,6 +24,12 @@ class ApplicationMessage {
     type: 'text',
   })
   text!: string;
+
+  @Column({
+    type: 'tinyint',
+    default: i.PUBLIC_MESSAGE.PRIVATE,
+  })
+  public!: i.PUBLIC_MESSAGE;
 
   @CreateDateColumn()
   createdAt!: string;

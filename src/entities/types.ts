@@ -1,1 +1,2 @@
+export enum PUBLIC_MESSAGE { PRIVATE, PUBLIC };
 
