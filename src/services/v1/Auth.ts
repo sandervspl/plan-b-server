@@ -9,7 +9,7 @@ import discordConfig from 'config/discord';
 import apiConfig from 'config/apiconfig';
 import secretConfig from 'config/secret';
 import UserService from 'services/v1/User';
-import discordBot from 'Bot/Discord';
+import discordBot from 'bot/Discord';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExpressParamsFn = (req: Request, res: Response, next: NextFunction) => any;
