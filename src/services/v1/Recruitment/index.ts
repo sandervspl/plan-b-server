@@ -3,6 +3,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { In } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
+import uuidv4 from 'uuid/v4';
 import { sortByDate } from 'helpers';
 import Database from 'database';
 import config from 'config/apiconfig';
@@ -171,11 +172,11 @@ export default class RecruitmentService {
           'Content-Type': 'application/json',
         },
       });
-      const application: i.CmsApplicationResponse = await response.json();
+      const newApplication: i.CmsApplicationResponse = await response.json();
 
       const applicationProfessionsRequests = professions.map((proff) => {
         const appProffBody: i.ApplicationProfessionBody = {
-          application: application.id,
+          application: newApplication.id,
           level: Number(proff.level),
           profession: proff.id,
         };
@@ -195,7 +196,16 @@ export default class RecruitmentService {
 
       await Promise.all(applicationProfessionsRequests);
 
-      return {};
+      // Create unique uuid for application
+      const applicationHash = new entities.ApplicationUuid();
+      applicationHash.applicationId = newApplication.id;
+      applicationHash.uuid = uuidv4();
+
+      const newUuid = await Database.repos.applicationuuid.save(applicationHash);
+
+      return {
+        applicationUuid: newUuid.uuid,
+      };
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }

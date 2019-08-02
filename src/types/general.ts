@@ -5,6 +5,7 @@ export type Repositories = {
   user: Repository<entities.User>;
   applicationmessage: Repository<entities.ApplicationMessage>;
   applicationvote: Repository<entities.ApplicationVote>;
+  applicationuuid: Repository<entities.ApplicationUuid>;
 }
 
 export enum AUTH_LEVEL {
