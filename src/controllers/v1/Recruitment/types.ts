@@ -7,3 +7,7 @@ export type ApplicationsParam = {
 export type SingleApplicationParam = {
   id: number;
 }
+
+export type SinglePublicApplicationParam = {
+  uuid: string;
+}

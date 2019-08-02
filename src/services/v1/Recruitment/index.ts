@@ -1,5 +1,5 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { In } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
@@ -93,6 +93,28 @@ export default class RecruitmentService {
       throw new InternalServerErrorException(null, err);
     }
   }
+
+  public singlePublicApplication = async (uuid: string) => {
+    try {
+      const application = await Database.repos.applicationuuid.findOne({ where: { uuid } });
+      if (!application) {
+        throw new NotFoundException();
+      }
+
+      const applicationDetail = await this.singleApplication(application.applicationId);
+
+      if (!applicationDetail) {
+        throw new NotFoundException();
+      }
+
+      delete applicationDetail.discussion;
+      delete applicationDetail.votes;
+
+      return applicationDetail;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  };
 
   public addApplicationComment = async (applicationId: number, body: i.AddApplicationCommentBody) => {
     try {
