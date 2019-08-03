@@ -64,10 +64,9 @@ async function bootstrap() {
   // @ts-ignore this works
   const MysqlStore = mysqlSession(session);
 
-  const sessionName = 'plan-b-auth';
   const sessionCfg: SessionOptions = {
     secret: secretConfig.sessionSecret,
-    name: sessionName,
+    name: 'plan-b-auth',
     resave: false,
     saveUninitialized: false,
     proxy: isProd,
