@@ -10,7 +10,7 @@ class Config {
       case 'acceptation':
         return 'https://api-acc.planbguild.eu';
       case 'production':
-        return 'https://planbguild.eu';
+        return 'https://api.planbguild.eu';
       default:
         return 'http://localhost:8080';
     }
