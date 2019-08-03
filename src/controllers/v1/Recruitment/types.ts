@@ -1,6 +1,6 @@
 import * as i from 'types';
 
-export type MessageType = 'private' | 'public' | 'all';
+export type ViewableType = 'private' | 'public' | 'all';
 
 export type ApplicationsParam = {
   status: i.ApplicationStatus;
@@ -11,7 +11,7 @@ export type ApplicationMessagesParam = {
 }
 
 export type ApplicationMessagesQuery = {
-  type: i.MessageType;
+  type: i.ViewableType;
 }
 
 export type SingleApplicationParam = {

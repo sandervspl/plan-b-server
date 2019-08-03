@@ -11,7 +11,7 @@ import { PrimaryProfession } from './types/AddApplicationRequestBody';
 
 @Injectable()
 export default class RecruitmentService {
-  public applications = async (status: i.ApplicationStatus) => {
+  public applications = async (status: i.ApplicationStatus, type: i.ViewableType = 'private') => {
     try {
       const res = await fetch(`${config.cmsDomain}/applications`);
       const data: i.CmsApplicationResponse[] = await res.json();
@@ -29,9 +29,11 @@ export default class RecruitmentService {
         return [];
       }
 
+      // Get comments count
       const comments = await Database.repos.applicationmessage.find({
         where: {
           applicationId: In(applications.map((app) => app.id)),
+          public: Number(type === 'public'),
         },
       });
 
@@ -39,6 +41,24 @@ export default class RecruitmentService {
         ...app,
         commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
       }));
+
+      return response;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
+  public publicApplications = async (status: i.ApplicationStatus) => {
+    try {
+      const applications = await Database.repos.applicationuuid.find();
+      const cmsApplications = await this.applications(status, 'public');
+
+      const response = cmsApplications
+        .filter((app) => applications.find((uuidApp) => uuidApp.applicationId === app.id))
+        .map((app) => ({
+          ...app,
+          public: applications.find((uuidApp) => uuidApp.applicationId === app.id),
+        }));
 
       return response;
     } catch (err) {
@@ -95,7 +115,7 @@ export default class RecruitmentService {
     }
   }
 
-  public getMessages = async (applicationId: number, type: i.MessageType) => {
+  public getComments = async (applicationId: number, type: i.ViewableType) => {
     const messagesTypeQuery: Record<string, number> = {};
 
     if (type !== 'all') {
@@ -125,7 +145,7 @@ export default class RecruitmentService {
     }
   }
 
-  public addApplicationComment = async (applicationId: number, body: i.AddApplicationCommentBody) => {
+  public addComment = async (applicationId: number, body: i.AddApplicationCommentBody) => {
     try {
       const newComment = new entities.ApplicationMessage();
       newComment.applicationId = applicationId;
