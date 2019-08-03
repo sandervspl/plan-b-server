@@ -98,10 +98,8 @@ export default class RecruitmentService {
   public getMessages = async (applicationId: number, type: i.MessageType) => {
     const messagesTypeQuery: Record<string, number> = {};
 
-    if (type === 'private') {
-      messagesTypeQuery.public = 0;
-    } else if (type === 'public') {
-      messagesTypeQuery.public = 1;
+    if (type !== 'all') {
+      messagesTypeQuery.public = Number(type === 'public');
     }
 
     try {
@@ -273,6 +271,7 @@ export default class RecruitmentService {
       'id',
       'username',
       'avatar',
+      'authLevel',
     ];
 
     return _.pick(user, safeData);
