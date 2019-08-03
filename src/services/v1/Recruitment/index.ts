@@ -3,8 +3,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { In } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
-import uuidv4 from 'uuid/v4';
-import { sortByDate } from 'helpers';
+import { sortByDate, generateRandomString } from 'helpers';
 import Database from 'database';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
@@ -57,9 +56,6 @@ export default class RecruitmentService {
           applicationId: id,
         },
         relations: ['user'],
-        order: {
-          createdAt: 'DESC',
-        },
       });
 
       votes = votes.map((vote) => ({
@@ -91,7 +87,6 @@ export default class RecruitmentService {
         throw new NotFoundException();
       }
 
-      delete applicationDetail.discussion;
       delete applicationDetail.votes;
 
       return applicationDetail;
@@ -238,7 +233,9 @@ export default class RecruitmentService {
       // Create unique uuid for application
       const applicationHash = new entities.ApplicationUuid();
       applicationHash.applicationId = newApplication.id;
-      applicationHash.uuid = uuidv4();
+
+      const idLength = 5;
+      applicationHash.uuid = generateRandomString(idLength);
 
       const newUuid = await Database.repos.applicationuuid.save(applicationHash);
 
