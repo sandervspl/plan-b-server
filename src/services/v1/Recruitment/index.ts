@@ -214,6 +214,7 @@ export default class RecruitmentService {
       char_raid_experience: body.raid_experience,
       char_name: body.character.name,
       char_level: body.character.level,
+      social: body.social,
     };
 
     try {

@@ -30,6 +30,7 @@ export type CmsApplicationBody = {
   reason: string;
   race: number;
   professions: number[];
+  social: boolean;
 }
 
 export type CmsApplicationResponse = i.BaseResponseBody & {

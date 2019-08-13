@@ -36,4 +36,5 @@ export type AddApplicationRequestBody = {
   role: string;
   raid_experience: i.RaidExperience;
   personal: Personal;
+  social: boolean;
 }
