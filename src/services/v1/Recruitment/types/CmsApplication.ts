@@ -49,4 +49,5 @@ export type CmsApplicationResponse = i.BaseResponseBody & {
   race: i.Race;
   professions: Profession[];
   applicationprofessions: ApplicationProfessionDetail[];
+  social: boolean;
 };

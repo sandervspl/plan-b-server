@@ -346,6 +346,7 @@ export default class RecruitmentService {
         story: application.story,
         reason: application.reason,
       },
+      social: application.social,
     };
   }
 }
