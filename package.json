@@ -8,7 +8,8 @@
     "build": "npm run clean && tsc",
     "start": "node -r ./tsconfig-paths-bootstrap.js dist/Server.js",
     "clean": "rimraf dist/",
-    "lint": "eslint --ext .ts --ext .tsx src/"
+    "lint": "eslint --ext .ts --ext .tsx src/",
+    "docs": "typedoc src/"
   },
   "author": "Sander Vispoel <contact@sandervispoel.com>",
   "license": "MIT",
@@ -50,6 +51,7 @@
     "rimraf": "^2.6.2",
     "ts-node-dev": "1.0.0-pre.40",
     "ts-toolbelt": "2.1.5",
+    "typedoc": "0.15.0",
     "typescript": "3.5.3",
     "typescript-eslint-parser": "22.0.0"
   },
