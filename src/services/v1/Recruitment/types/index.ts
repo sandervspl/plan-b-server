@@ -19,13 +19,13 @@ export type UpdateApplicationStatusBody = {
 }
 
 export type RaidExperience = {
-  molten_core: boolean;
-  onyxia: boolean;
-  blackwing_lair: boolean;
-  zul_gurub: boolean;
-  aq_20: boolean;
-  aq_40: boolean;
-  naxxramas: boolean;
+  molten_core?: boolean;
+  onyxia?: boolean;
+  blackwing_lair?: boolean;
+  zul_gurub?: boolean;
+  aq_20?: boolean;
+  aq_40?: boolean;
+  naxxramas?: boolean;
 }
 
 export type ApplicationStatus = 'open' | 'accepted' | 'rejected';

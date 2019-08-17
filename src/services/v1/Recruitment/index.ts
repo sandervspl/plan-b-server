@@ -191,11 +191,11 @@ export default class RecruitmentService {
 
     if (body.professions) {
       if (body.professions.primary) {
-        professions = [...body.professions.primary];
+        professions = [...body.professions.primary.filter(Boolean)];
       }
 
       if (body.professions.secondary) {
-        professions = [...professions, ...body.professions.secondary];
+        professions = [...professions, ...body.professions.secondary.filter(Boolean)];
       }
     }
 
@@ -211,7 +211,7 @@ export default class RecruitmentService {
       class: body.character.class,
       characterrole: body.role,
       char_server: body.character.server,
-      char_raid_experience: body.raid_experience,
+      char_raid_experience: body.raid_experience || {},
       char_name: body.character.name,
       char_level: body.character.level,
       social: body.social,
