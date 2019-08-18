@@ -285,7 +285,7 @@ export default class RecruitmentService {
       const newUuid = await this.applicationUuidRepo.save(applicationHash);
 
       const channelId = env.isProduction
-        ? '596479071639306259'  // plan-b officer-chat
+        ? '612749365978726427'  // plan-b applications
         : '561859968681115658'; // plan-b testing
       const channel = discordBot.client.channels.get(channelId) as TextChannel;
 
