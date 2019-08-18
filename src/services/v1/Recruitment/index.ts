@@ -277,7 +277,7 @@ export default class RecruitmentService {
       const applicationHash = new entities.ApplicationUuid();
       applicationHash.applicationId = newApplication.id;
 
-      const idLength = 5;
+      const idLength = 8;
       applicationHash.uuid = generateRandomString(idLength);
 
       const newUuid = await this.applicationUuidRepo.save(applicationHash);
