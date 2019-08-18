@@ -11,7 +11,6 @@ class Database {
     // Open connection to database
     createConnection({
       ...ormconfig,
-      type: 'mysql',
       entities: Object.values(entities),
     })
       .then((connection) => {
