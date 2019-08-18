@@ -22,6 +22,7 @@ class ApplicationMessage {
 
   @Column({
     type: 'text',
+    collation: 'utf8mb4_bin', // Supports emojis
   })
   text!: string;
 
