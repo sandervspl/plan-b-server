@@ -21,7 +21,6 @@
             "helpers/*": ["helpers/*"],
             "services/*": ["services/*"],
             "modules/*": ["modules/*"],
-            "database/*": ["database/index"],
             "types/*": ["types/*"]
         },
         "lib": ["esnext"]
