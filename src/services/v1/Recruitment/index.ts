@@ -4,7 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
-import { sortByDate, generateRandomString } from 'helpers';
+import { TextChannel, RichEmbed } from 'discord.js';
+import { sortByDate, generateRandomString, env } from 'helpers';
+import discordBot from 'bot/Discord';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
 import { PrimaryProfession } from './types/AddApplicationRequestBody';
@@ -281,6 +283,25 @@ export default class RecruitmentService {
       applicationHash.uuid = generateRandomString(idLength);
 
       const newUuid = await this.applicationUuidRepo.save(applicationHash);
+
+      const channelId = env.isProduction
+        ? '596479071639306259'  // plan-b officer-chat
+        : '561859968681115658'; // plan-b testing
+      const channel = discordBot.client.channels.get(channelId) as TextChannel;
+
+      if (channel) {
+        const embed = new RichEmbed()
+          .setColor('#DE3D3D')
+          .setAuthor('New application!', `${config.cmsDomain}/${newApplication.class.icon.url}`)
+          .setTitle('Go to application')
+          .setURL(`${config.websiteDomain}/application/${newUuid.uuid}`)
+          .addField('Guild role', newApplication.social ? 'Social' : 'Raider')
+          .addField('Name', newApplication.char_name)
+          .addField('Character', `${newApplication.race.name} ${newApplication.class.name}`, true)
+          .addField('Role', newApplication.characterrole.name, true);
+
+        channel.send(embed);
+      }
 
       return {
         applicationUuid: newUuid.uuid,
