@@ -1,17 +1,19 @@
 import * as i from 'types';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import * as entities from 'entities';
-import { Service } from './Service';
 
 @Injectable()
-export default class UserService extends Service<entities.User> {
-  constructor() {
-    super(entities.User);
-  }
+export default class UserService {
+  constructor(
+    @InjectRepository(entities.User)
+    private readonly userRepo: Repository<entities.User>
+  ) {}
 
   public single = async (id: string) => {
     try {
-      const user = await this.repo.findOne(id);
+      const user = await this.userRepo.findOne(id);
 
       if (!user) {
         throw new NotFoundException();
@@ -33,7 +35,7 @@ export default class UserService extends Service<entities.User> {
     newUser.avatar = user.avatar;
 
     try {
-      await this.repo.save(newUser);
+      await this.userRepo.save(newUser);
 
       return newUser;
     } catch (err) {
