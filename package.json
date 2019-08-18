@@ -31,7 +31,8 @@
     "rxjs": "6.3.3",
     "simple-oauth2": "2.2.1",
     "tsconfig-paths": "3.8.0",
-    "typeorm": "^0.2.7"
+    "typeorm": "^0.2.7",
+    "xml-js": "1.6.11"
   },
   "devDependencies": {
     "@types/cookie-parser": "1.4.1",

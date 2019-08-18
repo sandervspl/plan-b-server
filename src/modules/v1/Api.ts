@@ -9,6 +9,7 @@ import CmsModule from 'modules/v1/Cms';
 import UserModule from 'modules/v1/User';
 import TwitchModule from './Twitch';
 import RecruitmentModule from './Recruitment';
+import DkpModule from './Dkp';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import RecruitmentModule from './Recruitment';
     UserModule,
     TwitchModule,
     RecruitmentModule,
+    DkpModule,
   ],
 })
 export default class ApplicationModule {
