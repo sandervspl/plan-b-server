@@ -1,5 +1,5 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, MethodNotAllowedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
@@ -179,10 +179,23 @@ export default class RecruitmentService {
 
   public addApplicationVote = async (applicationId: number, body: i.AddApplicationVoteBody) => {
     try {
+      const user = await this.userRepo.findOneOrFail(body.userId);
+
+      const hasVoted = await this.applicationVoteRepo.find({
+        where: {
+          user,
+          applicationId,
+        },
+      });
+
+      if (hasVoted.length > 0) {
+        throw new MethodNotAllowedException('User has already voted.');
+      }
+
       const newVote = new entities.ApplicationVote();
       newVote.applicationId = applicationId;
       newVote.vote = body.vote;
-      newVote.user = await this.userRepo.findOneOrFail(body.userId);
+      newVote.user = user;
 
       const savedVote = await this.applicationVoteRepo.save(newVote);
 
