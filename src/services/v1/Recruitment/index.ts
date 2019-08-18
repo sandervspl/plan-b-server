@@ -1,16 +1,27 @@
 import * as i from 'types';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { In } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import { sortByDate, generateRandomString } from 'helpers';
-import Database from 'database';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
 import { PrimaryProfession } from './types/AddApplicationRequestBody';
 
 @Injectable()
 export default class RecruitmentService {
+  constructor(
+    @InjectRepository(entities.ApplicationMessage)
+    private readonly applicationMessageRepo: Repository<entities.ApplicationMessage>,
+    @InjectRepository(entities.ApplicationUuid)
+    private readonly applicationUuidRepo: Repository<entities.ApplicationUuid>,
+    @InjectRepository(entities.ApplicationVote)
+    private readonly applicationVoteRepo: Repository<entities.ApplicationVote>,
+    @InjectRepository(entities.User)
+    private readonly userRepo: Repository<entities.User>,
+  ) {}
+
   public applications = async (status: i.ApplicationStatus, type: i.ViewableType = 'private') => {
     try {
       const res = await fetch(`${config.cmsDomain}/applications`);
@@ -30,7 +41,7 @@ export default class RecruitmentService {
       }
 
       // Get comments count
-      const comments = await Database.repos.applicationmessage.find({
+      const comments = await this.applicationMessageRepo.find({
         where: {
           applicationId: In(applications.map((app) => app.id)),
           public: Number(type === 'public'),
@@ -50,7 +61,7 @@ export default class RecruitmentService {
 
   public publicApplications = async (status: i.ApplicationStatus) => {
     try {
-      const applications = await Database.repos.applicationuuid.find();
+      const applications = await this.applicationUuidRepo.find();
       const cmsApplications = await this.applications(status, 'public');
 
       const response = cmsApplications
@@ -71,7 +82,7 @@ export default class RecruitmentService {
       const res = await fetch(`${config.cmsDomain}/applications/${id}`);
       const data: i.CmsApplicationResponse = await res.json();
 
-      let votes: entities.ApplicationVote[] = await Database.repos.applicationvote.find({
+      let votes: entities.ApplicationVote[] = await this.applicationVoteRepo.find({
         where: {
           applicationId: id,
         },
@@ -96,7 +107,7 @@ export default class RecruitmentService {
 
   public singlePublicApplication = async (uuid: string) => {
     try {
-      const application = await Database.repos.applicationuuid.findOne({ where: { uuid } });
+      const application = await this.applicationUuidRepo.findOne({ where: { uuid } });
       if (!application) {
         throw new NotFoundException();
       }
@@ -123,7 +134,7 @@ export default class RecruitmentService {
     }
 
     try {
-      let messages = await Database.repos.applicationmessage.find({
+      let messages = await this.applicationMessageRepo.find({
         where: {
           applicationId,
           ...messagesTypeQuery,
@@ -151,9 +162,9 @@ export default class RecruitmentService {
       newComment.applicationId = applicationId;
       newComment.text = body.comment;
       newComment.public = body.isPublic;
-      newComment.user = await Database.repos.user.findOneOrFail(body.userId);
+      newComment.user = await this.userRepo.findOneOrFail(body.userId);
 
-      const savedComment = await Database.repos.applicationmessage.save(newComment);
+      const savedComment = await this.applicationMessageRepo.save(newComment);
 
       const response = {
         ...savedComment,
@@ -171,9 +182,9 @@ export default class RecruitmentService {
       const newVote = new entities.ApplicationVote();
       newVote.applicationId = applicationId;
       newVote.vote = body.vote;
-      newVote.user = await Database.repos.user.findOneOrFail(body.userId);
+      newVote.user = await this.userRepo.findOneOrFail(body.userId);
 
-      const savedVote = await Database.repos.applicationvote.save(newVote);
+      const savedVote = await this.applicationVoteRepo.save(newVote);
 
       const response = {
         ...savedVote,
@@ -256,7 +267,7 @@ export default class RecruitmentService {
       const idLength = 5;
       applicationHash.uuid = generateRandomString(idLength);
 
-      const newUuid = await Database.repos.applicationuuid.save(applicationHash);
+      const newUuid = await this.applicationUuidRepo.save(applicationHash);
 
       return {
         applicationUuid: newUuid.uuid,
