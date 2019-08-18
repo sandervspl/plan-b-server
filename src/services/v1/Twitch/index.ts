@@ -1,25 +1,27 @@
 import * as i from 'types';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import * as entities from 'entities';
 import config from 'config/apiconfig';
 import secret from 'config/secret';
-import { Service } from '../Service';
 
 @Injectable()
-export default class TwitchService extends Service<entities.Streamer> {
+export default class TwitchService {
   private static readonly headers = {
     'Client-ID': secret.twitch.privateKey,
   };
 
-  constructor() {
-    super(entities.Streamer);
-  }
+  constructor(
+    @InjectRepository(entities.Streamer)
+    private readonly StreamerRepo: Repository<entities.Streamer>,
+  ) {}
 
-  public streamers = async () => {
+  public activeStreamers = async () => {
     try {
-      const streamers = await this.repo.find({
+      const streamers = await this.StreamerRepo.find({
         where: {
           enabled: 1,
         },
@@ -28,7 +30,6 @@ export default class TwitchService extends Service<entities.Streamer> {
       if (!streamers) {
         throw new NotFoundException();
       }
-
 
       const streamsQueryStr = streamers.reduce((prev, streamer, i) => {
         if (i === 0) {

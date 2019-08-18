@@ -8,7 +8,7 @@ export default class TwitchController {
   ) {}
 
   @Get('/active_streams')
-  private async streamers() {
-    return this.twitchService.streamers();
+  private async activeStreamers() {
+    return this.twitchService.activeStreamers();
   }
 }
