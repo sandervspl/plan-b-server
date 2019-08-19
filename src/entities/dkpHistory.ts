@@ -15,6 +15,12 @@ class DkpHistory {
   @JoinTable()
   user!: User;
 
+  // Difference in DKP from last DKP export
+  @Column({
+    type: 'int',
+  })
+  net!: number;
+
   @Column({
     type: 'varchar',
   })

@@ -1,4 +1,5 @@
 export { ViewableType } from './v1/Recruitment/types';
+export * from './v1/User/types';
 
 export type UserData = {
   username: string;
@@ -24,5 +25,4 @@ export type MeResponse = {
   avatar?: string;
   id: string;
   authLevel: number;
-  dkp: number;
 }

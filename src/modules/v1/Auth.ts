@@ -9,6 +9,7 @@ import UserService from 'services/v1/User';
   imports: [
     TypeOrmModule.forFeature([
       entities.User,
+      entities.Character,
     ]),
   ],
   controllers: [AuthController],

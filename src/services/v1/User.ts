@@ -8,7 +8,9 @@ import * as entities from 'entities';
 export default class UserService {
   constructor(
     @InjectRepository(entities.User)
-    private readonly userRepo: Repository<entities.User>
+    private readonly userRepo: Repository<entities.User>,
+    @InjectRepository(entities.Character)
+    private readonly characterRepo: Repository<entities.Character>,
   ) {}
 
   public single = async (id: string) => {
@@ -21,7 +23,7 @@ export default class UserService {
 
       return user;
     } catch (err) {
-      throw new InternalServerErrorException('Error while finding user', JSON.stringify(err));
+      throw new InternalServerErrorException('Error finding user', err);
     }
   }
 
@@ -29,7 +31,6 @@ export default class UserService {
   public create = async (user: i.CreateUserBody) => {
     const newUser = new entities.User();
     newUser.id = user.id;
-    newUser.dkp = 0;
     newUser.authLevel = user.authLevel;
     newUser.username = user.username;
     newUser.avatar = user.avatar;
@@ -39,7 +40,21 @@ export default class UserService {
 
       return newUser;
     } catch (err) {
-      throw new InternalServerErrorException('Error while creating user', JSON.stringify(err));
+      throw new InternalServerErrorException('Error creating user', err);
+    }
+  }
+
+  public linkCharacterToUser = async (body: i.LinkCharacterToUserBody) => {
+    try {
+      const character = await this.characterRepo.findOneOrFail({
+        where: {
+          name: body.characterName,
+        },
+      });
+
+      await this.userRepo.update(body.userId, { character });
+    } catch (err) {
+      throw new InternalServerErrorException('Error linking character to user', err);
     }
   }
 }

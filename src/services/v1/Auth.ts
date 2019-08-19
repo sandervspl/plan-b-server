@@ -132,9 +132,6 @@ export default class AuthService {
 
       // Overwrite avatar hash with a generated avatar url
       avatar: this.getAvatar(user.id, user.avatar),
-
-      // Current dragon kill points
-      dkp: dbUser.dkp,
     };
 
     return res.json(body);
