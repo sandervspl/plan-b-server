@@ -215,6 +215,7 @@ export default class RecruitmentService {
   public addApplication = async (body: i.AddApplicationRequestBody) => {
     let professions: PrimaryProfession[] = [];
 
+    // Concatenate primary and secondary professions
     if (body.professions) {
       if (body.professions.primary) {
         professions = [...body.professions.primary.filter(Boolean)];
@@ -227,6 +228,8 @@ export default class RecruitmentService {
 
     const professionIds = professions.map((proff) => proff.id);
 
+    // Create body for CMS
+    // @TODO Move out of CMS to Database
     const postBody: i.CmsApplicationBody = {
       age: Number(body.personal.age),
       story: body.personal.story,
@@ -244,6 +247,7 @@ export default class RecruitmentService {
     };
 
     try {
+      // Add application to CMS
       const response = await fetch(`${config.cmsDomain}/applications`, {
         method: 'POST',
         body: JSON.stringify(postBody),
@@ -253,6 +257,7 @@ export default class RecruitmentService {
       });
       const newApplication: i.CmsApplicationResponse = await response.json();
 
+      // Generate profession level entries
       const applicationProfessionsRequests = professions.map((proff) => {
         const appProffBody: i.ApplicationProfessionBody = {
           application: newApplication.id,
@@ -273,6 +278,7 @@ export default class RecruitmentService {
         ));
       });
 
+      // Add profession level entries to CMS
       await Promise.all(applicationProfessionsRequests);
 
       // Create unique uuid for application
@@ -284,6 +290,7 @@ export default class RecruitmentService {
 
       const newUuid = await this.applicationUuidRepo.save(applicationHash);
 
+      // Create Discord message about this application
       const channelId = env.isProduction
         ? '612749365978726427'  // plan-b applications
         : '561859968681115658'; // plan-b testing
@@ -300,6 +307,7 @@ export default class RecruitmentService {
           .addField('Character', `${newApplication.race.name} ${newApplication.class.name}`, true)
           .addField('Role', newApplication.characterrole.name, true);
 
+        // Share message to Discord channel
         channel.send(embed);
       }
 
