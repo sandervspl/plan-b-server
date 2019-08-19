@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 @Entity()
+@Unique(['name'])
 class Character {
   @PrimaryGeneratedColumn({
     type: 'int',
@@ -9,7 +10,13 @@ class Character {
   id!: number;
 
   @Column({
-    type: 'integer',
+    type: 'varchar',
+    length: 12,
+  })
+  name!: string;
+
+  @Column({
+    type: 'int',
     default: 0,
   })
   dkp!: number;
