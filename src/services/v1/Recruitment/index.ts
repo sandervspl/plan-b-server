@@ -1,5 +1,5 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException, MethodNotAllowedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
@@ -191,7 +191,7 @@ export default class RecruitmentService {
       });
 
       if (hasVoted.length > 0) {
-        throw new MethodNotAllowedException('User has already voted.');
+        return;
       }
 
       const newVote = new entities.ApplicationVote();
