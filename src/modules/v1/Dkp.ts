@@ -8,6 +8,7 @@ import DkpController from 'controllers/v1/Dkp';
   imports: [
     TypeOrmModule.forFeature([
       entities.DkpHistory,
+      entities.Character,
     ]),
   ],
   controllers: [DkpController],

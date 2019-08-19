@@ -5,7 +5,7 @@ import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import { TextChannel, RichEmbed } from 'discord.js';
-import { sortByDate, generateRandomString, env } from 'helpers';
+import { sortByDate, generateRandomString, env, ERROR_NUM } from 'helpers';
 import discordBot from 'bot/Discord';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
@@ -196,8 +196,8 @@ export default class RecruitmentService {
 
       return response;
     } catch (err) {
-      if (err.code && err.code === 'ER_DUP_ENTRY') {
-        throw new BadRequestException('Duplicate vote');
+      if (err && err.errno === ERROR_NUM.DUPLICATE_ENTRY) {
+        throw new BadRequestException('User has already voted.');
       }
 
       throw new InternalServerErrorException(null, env.isDevelopment ? err : null);

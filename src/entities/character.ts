@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany } from 'typeorm';
+import { DkpHistory } from 'entities';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 @Entity()
@@ -20,6 +21,9 @@ class Character {
     default: 0,
   })
   dkp!: number;
+
+  @OneToMany((type) => DkpHistory, (DkpHistory) => DkpHistory.character)
+  dkpHistories!: DkpHistory[];
 }
 
 export default Character;
