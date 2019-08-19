@@ -1,10 +1,12 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException, MethodNotAllowedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
-import { sortByDate, generateRandomString } from 'helpers';
+import { TextChannel, RichEmbed } from 'discord.js';
+import { sortByDate, generateRandomString, env } from 'helpers';
+import discordBot from 'bot/Discord';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
 import { PrimaryProfession } from './types/AddApplicationRequestBody';
@@ -188,7 +190,7 @@ export default class RecruitmentService {
       });
 
       if (hasVoted.length > 0) {
-        throw new MethodNotAllowedException('User has already voted.');
+        return;
       }
 
       const newVote = new entities.ApplicationVote();
@@ -212,6 +214,7 @@ export default class RecruitmentService {
   public addApplication = async (body: i.AddApplicationRequestBody) => {
     let professions: PrimaryProfession[] = [];
 
+    // Concatenate primary and secondary professions
     if (body.professions) {
       if (body.professions.primary) {
         professions = [...body.professions.primary.filter(Boolean)];
@@ -224,6 +227,8 @@ export default class RecruitmentService {
 
     const professionIds = professions.map((proff) => proff.id);
 
+    // Create body for CMS
+    // @TODO Move out of CMS to Database
     const postBody: i.CmsApplicationBody = {
       age: Number(body.personal.age),
       story: body.personal.story,
@@ -241,6 +246,7 @@ export default class RecruitmentService {
     };
 
     try {
+      // Add application to CMS
       const response = await fetch(`${config.cmsDomain}/applications`, {
         method: 'POST',
         body: JSON.stringify(postBody),
@@ -250,6 +256,7 @@ export default class RecruitmentService {
       });
       const newApplication: i.CmsApplicationResponse = await response.json();
 
+      // Generate profession level entries
       const applicationProfessionsRequests = professions.map((proff) => {
         const appProffBody: i.ApplicationProfessionBody = {
           application: newApplication.id,
@@ -270,16 +277,38 @@ export default class RecruitmentService {
         ));
       });
 
+      // Add profession level entries to CMS
       await Promise.all(applicationProfessionsRequests);
 
       // Create unique uuid for application
       const applicationHash = new entities.ApplicationUuid();
       applicationHash.applicationId = newApplication.id;
 
-      const idLength = 5;
+      const idLength = 8;
       applicationHash.uuid = generateRandomString(idLength);
 
       const newUuid = await this.applicationUuidRepo.save(applicationHash);
+
+      // Create Discord message about this application
+      const channelId = env.isProduction
+        ? '612749365978726427'  // plan-b applications
+        : '561859968681115658'; // plan-b testing
+      const channel = discordBot.client.channels.get(channelId) as TextChannel;
+
+      if (channel) {
+        const embed = new RichEmbed()
+          .setColor('#DE3D3D')
+          .setAuthor('New application!', `${config.cmsDomain}/${newApplication.class.icon.url}`)
+          .setTitle('Go to application')
+          .setURL(`${config.websiteDomain}/application/${newUuid.uuid}`)
+          .addField('Guild role', newApplication.social ? 'Social' : 'Raider')
+          .addField('Name', newApplication.char_name)
+          .addField('Character', `${newApplication.race.name} ${newApplication.class.name}`, true)
+          .addField('Role', newApplication.characterrole.name, true);
+
+        // Share message to Discord channel
+        channel.send(embed);
+      }
 
       return {
         applicationUuid: newUuid.uuid,
