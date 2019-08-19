@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as i from 'types';
 import {
-  Entity, CreateDateColumn, UpdateDateColumn, Column, PrimaryGeneratedColumn, ManyToOne,
+  Entity, CreateDateColumn, UpdateDateColumn, Column, PrimaryGeneratedColumn, ManyToOne, Unique,
 } from 'typeorm';
 import User from './user';
 
 @Entity()
+@Unique(['applicationId', 'user'])
 class ApplicationVote {
   @PrimaryGeneratedColumn({
     type: 'int',

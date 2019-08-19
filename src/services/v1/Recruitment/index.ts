@@ -1,5 +1,5 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
@@ -182,17 +182,6 @@ export default class RecruitmentService {
     try {
       const user = await this.userRepo.findOneOrFail(body.userId);
 
-      const hasVoted = await this.applicationVoteRepo.find({
-        where: {
-          user,
-          applicationId,
-        },
-      });
-
-      if (hasVoted.length > 0) {
-        return;
-      }
-
       const newVote = new entities.ApplicationVote();
       newVote.applicationId = applicationId;
       newVote.vote = body.vote;
@@ -207,7 +196,11 @@ export default class RecruitmentService {
 
       return response;
     } catch (err) {
-      throw new InternalServerErrorException(null, err);
+      if (err.code && err.code === 'ER_DUP_ENTRY') {
+        throw new BadRequestException('Duplicate vote');
+      }
+
+      throw new InternalServerErrorException(null, env.isDevelopment ? err : null);
     }
   }
 
