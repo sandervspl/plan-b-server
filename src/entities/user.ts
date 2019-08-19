@@ -1,8 +1,10 @@
 import {
-  Entity, CreateDateColumn, UpdateDateColumn, PrimaryColumn, Column, OneToMany,
+  Entity, CreateDateColumn, UpdateDateColumn, PrimaryColumn, Column, OneToMany, OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import ApplicationMessage from './applicationMessage';
 import ApplicationVote from './applicationVote';
+import Character from './character';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 @Entity()
@@ -29,11 +31,11 @@ class User {
   })
   authLevel!: number;
 
-  @Column({
-    type: 'integer',
-    default: 0,
+  @OneToOne((type) => Character, {
+    nullable: true,
   })
-  dkp!: number;
+  @JoinColumn()
+  character?: Character;
 
   @OneToMany((type) => ApplicationMessage, (message) => message.user)
   applicationMessages!: ApplicationMessage[];

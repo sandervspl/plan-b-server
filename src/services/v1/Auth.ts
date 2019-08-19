@@ -67,7 +67,6 @@ export default class AuthService {
                 username: this.getGuildMember(user.id)!.displayName,
                 avatar: this.getAvatar(user.id, user.avatar),
                 authLevel: this.getAuthLevel(user.id),
-                dkp: 0,
               });
 
               // Redirect to website

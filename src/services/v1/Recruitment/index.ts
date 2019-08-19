@@ -139,7 +139,6 @@ export default class RecruitmentService {
           applicationId,
           ...messagesTypeQuery,
         },
-        relations: ['user'],
         order: {
           createdAt: 'DESC',
         },
