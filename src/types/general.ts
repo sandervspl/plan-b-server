@@ -1,10 +1,17 @@
-import * as i from 'types';
 import { Repository } from 'typeorm';
+import * as entities from 'entities';
 
-export interface AuthRequest extends i.Request {
-  token: string;
+export type Repositories = {
+  user: Repository<entities.User>;
+  applicationmessage: Repository<entities.ApplicationMessage>;
+  applicationvote: Repository<entities.ApplicationVote>;
+  applicationuuid: Repository<entities.ApplicationUuid>;
 }
 
-export interface Repositories {
-  [index: string]: Repository<any>;
+export enum AUTH_LEVEL {
+  USER,
+  OFFICER,
+  GUILD_MASTER
 }
+
+export enum VOTE { REJECT, ACCEPT }

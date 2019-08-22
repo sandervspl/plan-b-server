@@ -8,15 +8,19 @@
         "experimentalDecorators": true,
         "sourceMap": true,
         "esModuleInterop": true,
+        "skipLibCheck": true,
+        "strict": true,
         "baseUrl": "src",
         "paths": {
+            "bot/*": ["bot/*"],
             "config/*": ["config/*"],
             "controllers/*": ["controllers/*"],
+            "entities": ["entities/index"],
             "entities/*": ["entities/*"],
+            "helpers": ["helpers/index"],
             "helpers/*": ["helpers/*"],
             "services/*": ["services/*"],
             "modules/*": ["modules/*"],
-            "database/*": ["Database.ts"],
             "types/*": ["types/*"]
         },
         "lib": ["esnext"]

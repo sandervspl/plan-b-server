@@ -1,18 +1,28 @@
-export interface TokenResult {
-  access_token?: string;
-  token_type?: 'Bearer';
-  expires_in?: number;
-  refresh_token?: string;
-  scope?: string;
-  error?: string;
-}
+export { ViewableType } from './v1/Recruitment/types';
 
-export interface Tokens {
+export type UserData = {
+  username: string;
+  locale: string;
+  mfa_enabled: boolean;
+  flags: number;
+  avatar?: string;
+  discriminator: string;
+  id: string;
+  provider: string;
   accessToken: string;
-  refreshToken: string;
+  fetchedAt: Date;
 }
 
-export interface FetchData {
-  status: number;
-  data: object;
+export type AugmentedUser = UserData & {
+  authLevel: number;
+  discordname: string;
+}
+
+export type MeResponse = {
+  username: string;
+  discordname: string;
+  avatar?: string;
+  id: string;
+  authLevel: number;
+  dkp: number;
 }

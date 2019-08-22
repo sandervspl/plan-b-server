@@ -1,9 +1,9 @@
-import * as i from 'types';
+import { ConnectionOptions } from 'typeorm';
 import secret from './secret';
 
 const db = secret.databaseInfo;
 
-const ormconfig = {
+const ormconfig: ConnectionOptions = {
   type: 'mysql',
   host: db.host,
   port: db.port,
@@ -12,6 +12,7 @@ const ormconfig = {
   database: db.database,
   synchronize: true,
   logging: false,
+  charset: 'utf8mb4',
 };
 
 export default ormconfig;

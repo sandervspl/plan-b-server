@@ -11,8 +11,8 @@ export default class CharacterController {
 
   @Get('/:name')
   private async single(@Param('name') name: string) {
-    const token = await this.blizzardService.getAccessToken();
+    await this.blizzardService.getAccessToken();
 
-    return this.characterService.single(name, token);
+    return this.characterService.single(name);
   }
 }

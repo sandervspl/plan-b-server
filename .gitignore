@@ -2,7 +2,8 @@
 .vscode/
 dist/
 node_modules/
+docs/
 
 Procfile
 herokugit
-src/config/blizzard.ts
+src/config/secret.ts
