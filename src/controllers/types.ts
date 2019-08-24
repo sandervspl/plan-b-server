@@ -25,4 +25,5 @@ export type MeResponse = {
   avatar?: string;
   id: string;
   authLevel: number;
+  dkp: number;
 }

@@ -19,7 +19,9 @@ export default class UserService {
 
   public single = async (id: string) => {
     try {
-      const user = await this.userRepo.findOne(id);
+      const user = await this.userRepo.findOne(id, {
+        relations: ['character'],
+      });
 
       if (!user) {
         throw new NotFoundException();

@@ -132,6 +132,8 @@ export default class AuthService {
 
       // Overwrite avatar hash with a generated avatar url
       avatar: this.getAvatar(user.id, user.avatar),
+
+      dkp: dbUser.character ? dbUser.character.dkp : 0,
     };
 
     return res.json(body);
