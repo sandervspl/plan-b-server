@@ -1,6 +1,6 @@
 import qs from 'querystring';
 import * as i from 'types';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import oauth2 from 'simple-oauth2';
 import fetch from 'node-fetch';
 import secretConfig from 'config/secret';
@@ -9,6 +9,7 @@ import apiconfig from 'config/apiconfig';
 @Injectable()
 export default class BlizzardService {
   private accessToken!: oauth2.AccessToken;
+  private readonly server = 'Ragnaros';
 
   public get queries() {
     return {
@@ -69,5 +70,50 @@ export default class BlizzardService {
     this.accessToken = await auth.accessToken.create(token);
 
     return this.accessToken;
+  }
+
+  public getClass = async (classId: number) => {
+    const queries = qs.stringify(this.queries);
+
+    try {
+      const response = await fetch(
+        `${apiconfig.blizzardApiUrl}/wow/data/character/classes?${queries}`
+      );
+      const data: i.ClassDataResponse = await response.json();
+
+      const classData = data.classes.find((cls) => cls.id === classId);
+
+      if (!classData) {
+        throw new NotFoundException(classId);
+      }
+
+      return classData;
+
+    } catch (err) {
+      throw new InternalServerErrorException(classId, err);
+    }
+  }
+
+  public singleCharacter = async (name: string) => {
+    const queries = qs.stringify({
+      ...this.queries,
+      fields: 'guild,items,professions',
+    });
+
+    try {
+      const response = await fetch(
+        `${apiconfig.blizzardApiUrl}/wow/character/${this.server}/${name}?${queries}`
+      );
+      const data: i.CharacterData = await response.json();
+
+      const classData = await this.getClass(data.class);
+
+      return {
+        ...data,
+        class: classData,
+      };
+    } catch (err) {
+      throw new NotFoundException(name, err);
+    }
   }
 }

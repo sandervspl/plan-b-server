@@ -53,8 +53,18 @@ export default class UserService {
       });
 
       await this.userRepo.update(body.userId, { character });
+
+      return {};
     } catch (err) {
+      if (err && err.name === 'EntityNotFound') {
+        throw new NotFoundException('Character not found');
+      }
+
       throw new InternalServerErrorException('Error linking character to user', err);
     }
+  }
+
+  public createCharacter = async (body: i.CreateCharacterBody) => {
+
   }
 }

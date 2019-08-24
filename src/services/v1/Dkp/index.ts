@@ -76,7 +76,7 @@ export default class DkpService {
       });
       await Promise.all(updates);
 
-      return 'OK';
+      return {};
     } catch (err) {
       if (err && err.errno === ERROR_NUM.DUPLICATE_ENTRY) {
         throw new BadRequestException('Export already submitted.');
