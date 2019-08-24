@@ -1,5 +1,6 @@
 import * as i from 'types';
-import { Controller, Patch, Body, Post } from '@nestjs/common';
+import { Request } from 'express';
+import { Controller, Patch, Body, Post, Req } from '@nestjs/common';
 import UserService from 'services/v1/User';
 
 @Controller('user')
@@ -9,8 +10,8 @@ export default class UserController {
   ) {}
 
   @Patch('/character')
-  private async linkCharacterToUser(@Body() body: i.LinkCharacterToUserBody) {
-    return this.userService.linkCharacterToUser(body);
+  private async linkCharacterToUser(@Body() body: i.LinkCharacterToUserBody, @Req() req: Request) {
+    return this.userService.linkCharacterToUser(body, req);
   }
 
   @Post('/character')

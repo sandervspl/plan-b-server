@@ -1,5 +1,8 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Request } from 'express';
+import {
+  Injectable, InternalServerErrorException, NotFoundException, BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as entities from 'entities';
@@ -45,7 +48,9 @@ export default class UserService {
     }
   }
 
-  public linkCharacterToUser = async (body: i.LinkCharacterToUserBody) => {
+  public linkCharacterToUser = async (body: i.LinkCharacterToUserBody, req: Request) => {
+    const user = req.user as i.AugmentedUser;
+
     try {
       const character = await this.characterRepo.findOneOrFail({
         where: {
@@ -53,7 +58,7 @@ export default class UserService {
         },
       });
 
-      await this.userRepo.update(body.userId, { character });
+      await this.userRepo.update(user.id, { character });
 
       return {};
     } catch (err) {
