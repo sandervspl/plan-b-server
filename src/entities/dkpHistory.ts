@@ -12,9 +12,7 @@ class DkpHistory {
   })
   id!: number;
 
-  @ManyToOne((type) => Character, (character) => character.dkpHistories, {
-    eager: true,
-  })
+  @ManyToOne((type) => Character, (character) => character.dkpHistories)
   character!: Character;
 
   // Gain from raid

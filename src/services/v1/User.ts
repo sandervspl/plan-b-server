@@ -48,9 +48,7 @@ export default class UserService {
     }
   }
 
-  public linkCharacterToUser = async (body: i.LinkCharacterToUserBody, req: Request) => {
-    const user = req.user as i.AugmentedUser;
-
+  public linkCharacterToUser = async (body: i.LinkCharacterToUserBody, user: i.AugmentedUser) => {
     try {
       const character = await this.characterRepo.findOneOrFail({
         where: {
@@ -84,6 +82,22 @@ export default class UserService {
       }
 
       throw new InternalServerErrorException('Error creating character', err);
+    }
+  }
+
+  public singleCharacter = async (user: i.AugmentedUser) => {
+    try {
+      const dbUser = await this.userRepo.findOneOrFail(user.id);
+      const character = await this.characterRepo.findOneOrFail({
+        where: {
+          user: dbUser,
+        },
+        relations: ['dkpHistories'],
+      });
+
+      return character;
+    } catch (err) {
+      throw new InternalServerErrorException('Error retrieving character', err);
     }
   }
 }

@@ -31,7 +31,7 @@ class User {
   })
   authLevel!: number;
 
-  @OneToOne((type) => Character, {
+  @OneToOne((type) => Character, (character) => character.user, {
     nullable: true,
   })
   @JoinColumn()

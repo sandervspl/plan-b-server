@@ -9,7 +9,7 @@ export default class DkpController {
 
   @Post('/')
   @UseInterceptors(FileInterceptor('file'))
-  private async addDkpHistory(@UploadedFile() file: any) {
+  private async addDkpHistory(@UploadedFile() file: any) { // eslint-disable-line @typescript-eslint/no-explicit-any, idk what the correct type is
     return this.dkpService.addDkpHistory(file);
   }
 }
