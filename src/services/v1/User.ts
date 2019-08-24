@@ -1,8 +1,9 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as entities from 'entities';
+import { ERROR_NUM } from 'helpers';
 
 @Injectable()
 export default class UserService {
@@ -65,6 +66,19 @@ export default class UserService {
   }
 
   public createCharacter = async (body: i.CreateCharacterBody) => {
+    try {
+      const character = new entities.Character();
+      character.name = body.characterName;
 
+      const newCharacter = await this.characterRepo.save(character);
+
+      return newCharacter;
+    } catch (err) {
+      if (err && err.errno === ERROR_NUM.DUPLICATE_ENTRY) {
+        throw new BadRequestException('Character already exists.');
+      }
+
+      throw new InternalServerErrorException('Error creating character', err);
+    }
   }
 }

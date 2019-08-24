@@ -1,9 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { DkpHistory } from 'entities';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 @Entity()
-@Unique(['name'])
 class Character {
   @PrimaryGeneratedColumn({
     type: 'int',
@@ -13,6 +12,7 @@ class Character {
   @Column({
     type: 'varchar',
     length: 12,
+    unique: true,
   })
   name!: string;
 
