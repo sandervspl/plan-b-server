@@ -67,7 +67,6 @@ export default class AuthService {
                 username: this.getGuildMember(user.id)!.displayName,
                 avatar: this.getAvatar(user.id, user.avatar),
                 authLevel: this.getAuthLevel(user.id),
-                dkp: 0,
               });
 
               // Redirect to website
@@ -134,8 +133,7 @@ export default class AuthService {
       // Overwrite avatar hash with a generated avatar url
       avatar: this.getAvatar(user.id, user.avatar),
 
-      // Current dragon kill points
-      dkp: dbUser.dkp,
+      dkp: dbUser.character ? dbUser.character.dkp : 0,
     };
 
     return res.json(body);

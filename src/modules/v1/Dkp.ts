@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as entities from 'entities';
-import UserController from 'controllers/v1/User';
-import UserService from 'services/v1/User';
+import DkpService from 'services/v1/Dkp';
+import DkpController from 'controllers/v1/Dkp';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      entities.User,
+      entities.DkpHistory,
       entities.Character,
     ]),
   ],
-  controllers: [UserController],
-  providers: [UserService],
+  controllers: [DkpController],
+  providers: [DkpService],
 })
-export default class UserModule {}
+export default class DkpModule {}
