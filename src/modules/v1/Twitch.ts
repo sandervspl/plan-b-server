@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import TwitchController from 'controllers/v1/Twitch';
 import TwitchService from 'services/v1/Twitch';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Streamer } from 'entities';
 
 @Module({

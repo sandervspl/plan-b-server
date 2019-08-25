@@ -17,7 +17,9 @@ class ApplicationMessage {
   })
   applicationId!: number;
 
-  @ManyToOne((type) => User, (user) => user.applicationMessages)
+  @ManyToOne((type) => User, (user) => user.applicationMessages, {
+    eager: true,
+  })
   user!: User;
 
   @Column({

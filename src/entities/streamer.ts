@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 class Streamer {
@@ -10,6 +10,7 @@ class Streamer {
 
   @Column({
     type: 'varchar',
+    unique: true,
   })
   twitch_name!: string;
 
@@ -18,6 +19,12 @@ class Streamer {
     default: 1,
   })
   enabled!: boolean;
+
+  @CreateDateColumn()
+  createdAt!: string;
+
+  @UpdateDateColumn()
+  updatedAt!: string;
 }
 
 export default Streamer;

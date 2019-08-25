@@ -23,7 +23,7 @@
             "modules/*": ["modules/*"],
             "types/*": ["types/*"]
         },
-        "lib": ["esnext"]
+        "lib": ["esnext", "dom"]
     },
     "exclude": ["node_modules"]
 }

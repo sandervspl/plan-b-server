@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity, Column, PrimaryGeneratedColumn, Unique, CreateDateColumn, UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
+@Unique(['applicationId', 'uuid'])
 class ApplicationUuid {
   @PrimaryGeneratedColumn({
     type: 'int',
@@ -17,6 +20,12 @@ class ApplicationUuid {
     type: 'varchar',
   })
   uuid!: string;
+
+  @CreateDateColumn()
+  createdAt!: string;
+
+  @UpdateDateColumn()
+  updatedAt!: string;
 }
 
 export default ApplicationUuid;

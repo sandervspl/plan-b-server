@@ -1,11 +1,11 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import { TextChannel, RichEmbed } from 'discord.js';
-import { sortByDate, generateRandomString, env } from 'helpers';
+import { sortByDate, generateRandomString, env, ERROR_NUM } from 'helpers';
 import discordBot from 'bot/Discord';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
@@ -141,7 +141,6 @@ export default class RecruitmentService {
           applicationId,
           ...messagesTypeQuery,
         },
-        relations: ['user'],
         order: {
           createdAt: 'DESC',
         },
@@ -183,17 +182,6 @@ export default class RecruitmentService {
     try {
       const user = await this.userRepo.findOneOrFail(body.userId);
 
-      const hasVoted = await this.applicationVoteRepo.find({
-        where: {
-          user,
-          applicationId,
-        },
-      });
-
-      if (hasVoted.length > 0) {
-        return;
-      }
-
       const newVote = new entities.ApplicationVote();
       newVote.applicationId = applicationId;
       newVote.vote = body.vote;
@@ -208,7 +196,11 @@ export default class RecruitmentService {
 
       return response;
     } catch (err) {
-      throw new InternalServerErrorException(null, err);
+      if (err && err.errno === ERROR_NUM.DUPLICATE_ENTRY) {
+        throw new BadRequestException('User has already voted.');
+      }
+
+      throw new InternalServerErrorException(null, env.isDevelopment ? err : null);
     }
   }
 
