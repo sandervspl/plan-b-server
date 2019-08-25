@@ -85,4 +85,54 @@ export default class DkpService {
       throw new InternalServerErrorException('Error while inserting DKP history', err);
     }
   }
+
+  public getAverageGuildDkp = async () => {
+    // Get all characters
+    const characters = await this.CharacterRepo.find({
+      relations: ['dkpHistories'],
+    });
+
+    // Get total DKP by export times
+    const totals = characters.reduce((prev, character) => {
+      character.dkpHistories.forEach((entry) => {
+        prev = {
+          ...prev,
+          [entry.exportTime]: {
+            ...prev[entry.exportTime],
+            dkp: prev[entry.exportTime]
+              ? prev[entry.exportTime].dkp + entry.total
+              : entry.total,
+            count: prev[entry.exportTime] ? prev[entry.exportTime].count + 1 : 1,
+            date: entry.createdAt,
+          },
+        };
+      });
+
+      return prev;
+    }, {} as TotalDkpPerExportTime);
+
+    // Calculate averages by export times
+    const averages = Object.keys(totals).reduce((prev, cur) => {
+      return {
+        ...prev,
+        [cur]: {
+          value: totals[cur].dkp / totals[cur].count,
+          date: totals[cur].date,
+        },
+      };
+    }, {} as AverageDkpPerExportTime);
+
+    return averages;
+  }
 }
+
+type TotalDkpPerExportTime = Record<string, {
+  dkp: number;
+  count: number;
+  date: Date;
+}>
+
+type AverageDkpPerExportTime = Record<string, {
+  value: number;
+  date: Date;
+}>
