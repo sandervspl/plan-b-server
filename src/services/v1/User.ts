@@ -1,5 +1,4 @@
 import * as i from 'types';
-import { Request } from 'express';
 import {
   Injectable, InternalServerErrorException, NotFoundException, BadRequestException,
 } from '@nestjs/common';
@@ -89,15 +88,15 @@ export default class UserService {
 
   public singleCharacter = async (user: i.AugmentedUser) => {
     try {
-      const dbUser = await this.userRepo.findOneOrFail(user.id);
-      const character = await this.characterRepo.findOneOrFail({
-        where: {
-          user: dbUser,
-        },
-        relations: ['dkpHistories'],
+      const dbUser = await this.userRepo.findOneOrFail(user.id, {
+        relations: ['character', 'character.dkpHistories'],
       });
 
-      return character;
+      if (!dbUser.character) {
+        throw new NotFoundException('No character found for user');
+      }
+
+      return dbUser.character;
     } catch (err) {
       throw new InternalServerErrorException('Error retrieving character', err);
     }
