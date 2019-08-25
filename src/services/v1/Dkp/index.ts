@@ -16,7 +16,7 @@ export default class DkpService {
     private readonly CharacterRepo: Repository<entities.Character>,
   ) {}
 
-  public addDkpHistory = async (file: { buffer: Buffer }) => {
+  public addDkpHistory = async (file: { buffer: Buffer }, name: string) => {
     try {
       // Convert file buffer to XML string
       const xml = file.buffer.toString();
@@ -55,6 +55,7 @@ export default class DkpService {
           dkpEntry.hours = Number(characterRaidData.hours);
           dkpEntry.exporter = raidData.attributes.exporter;
           dkpEntry.exportTime = Number(raidData.attributes.time);
+          dkpEntry.event = name;
 
           return [dkpEntry, characterRaidData] as const;
         })

@@ -48,6 +48,11 @@ class DkpHistory {
   })
   exportTime!: number;
 
+  @Column({
+    type: 'varchar',
+  })
+  event!: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 

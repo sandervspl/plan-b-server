@@ -1,5 +1,5 @@
 import {
-  Controller, Post, UseInterceptors, FileInterceptor, UploadedFile, UseGuards, Get,
+  Controller, Post, UseInterceptors, FileInterceptor, UploadedFile, UseGuards, Get, Body,
 } from '@nestjs/common';
 import DkpService from 'services/v1/Dkp';
 import { AdminGuard } from 'guards/auth';
@@ -13,8 +13,8 @@ export default class DkpController {
   @Post('/')
   @UseInterceptors(FileInterceptor('file'))
   @UseGuards(AdminGuard)
-  private async addDkpHistory(@UploadedFile() file: any) { // eslint-disable-line @typescript-eslint/no-explicit-any, idk what the correct type is
-    return this.dkpService.addDkpHistory(file);
+  private async addDkpHistory(@UploadedFile() file: any, @Body() body: { name: string }) { // eslint-disable-line @typescript-eslint/no-explicit-any, idk what the correct type is
+    return this.dkpService.addDkpHistory(file, body.name);
   }
 
   @Get('/guild_average')
