@@ -11,6 +11,7 @@ class Streamer {
   @Column({
     type: 'varchar',
     unique: true,
+    nullable: false,
   })
   twitch_name!: string;
 

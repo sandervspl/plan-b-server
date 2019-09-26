@@ -34,13 +34,13 @@ export default class UserService {
 
   // Create user
   public create = async (user: i.CreateUserBody) => {
-    const newUser = new entities.User();
-    newUser.id = user.id;
-    newUser.authLevel = user.authLevel;
-    newUser.username = user.username;
-    newUser.avatar = user.avatar;
-
     try {
+      const newUser = new entities.User();
+      newUser.id = user.id;
+      newUser.authLevel = user.authLevel;
+      newUser.username = user.username;
+      newUser.avatar = user.avatar;
+
       await this.userRepo.save(newUser);
 
       return newUser;

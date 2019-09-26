@@ -1,5 +1,7 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable, InternalServerErrorException, NotFoundException, BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
