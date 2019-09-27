@@ -158,6 +158,13 @@ export default class AuthService {
     return _.pick(user, safeData);
   }
 
+
+  private userIsGuildMaster = (memberId: string): boolean => {
+    const user = this.getGuildMember(memberId);
+
+    return !!user && !!user.roles.get(discordConfig.guildLeaderId);
+  }
+
   private userIsAdmin = (memberId: string): boolean => {
     const user = this.getGuildMember(memberId);
 
@@ -175,6 +182,10 @@ export default class AuthService {
   }
 
   private getAuthLevel = (memberId: string): i.AUTH_LEVEL => {
+    if (this.userIsGuildMaster(memberId)) {
+      return i.AUTH_LEVEL.GUILD_MASTER;
+    }
+
     if (this.userIsAdmin(memberId)) {
       return i.AUTH_LEVEL.OFFICER;
     }
