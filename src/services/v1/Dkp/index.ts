@@ -26,7 +26,13 @@ export default class DkpService {
 
       // Extract data as readable variabes
       const [raidData] = result.elements;
-      const players = raidData.elements;
+      const players = raidData.elements.map((element) => ({
+        ...element,
+        attributes: {
+          ...element.attributes,
+          playername: element.attributes.playername.split('-')[0], // Remove server from name
+        },
+      }));
 
       // Look up character entries from names in XML
       const playerNames = players.map(({ attributes: player }) => player.playername);
