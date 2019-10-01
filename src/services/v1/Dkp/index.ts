@@ -93,7 +93,7 @@ export default class DkpService {
       relations: ['dkpHistories'],
     });
 
-    // Get total DKP by export times
+    // Get total current DKP by export times
     const totals = characters.reduce((prev, character) => {
       character.dkpHistories.forEach((entry) => {
         prev = {
@@ -101,8 +101,8 @@ export default class DkpService {
           [entry.exportTime]: {
             ...prev[entry.exportTime],
             dkp: prev[entry.exportTime]
-              ? prev[entry.exportTime].dkp + entry.total
-              : entry.total,
+              ? prev[entry.exportTime].dkp + entry.net
+              : entry.net,
             count: prev[entry.exportTime] ? prev[entry.exportTime].count + 1 : 1,
             date: entry.createdAt,
           },
