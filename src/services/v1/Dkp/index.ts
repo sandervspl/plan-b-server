@@ -36,18 +36,14 @@ export default class DkpService {
       }));
 
       // Look up character entries from names in XML
-      const playerNames = players.map(({ attributes: player }) => player.playername);
+      const playerNames = players.map(({ attributes: player }) => player.playername.toLowerCase());
 
-      /**
-       * @todo Also return a list of characters that were NOT matched
-       * then create new entries for those characters
-       * */
       const characters = await this.CharacterRepo.find({
         where: In(playerNames),
       });
 
       // Check for missing characters
-      const characterNames = characters.map((character) => character.name);
+      const characterNames = characters.map((character) => character.name.toLowerCase());
       const diffCharacters = _.difference(playerNames, characterNames);
 
       // Create new batch of characters
@@ -68,7 +64,7 @@ export default class DkpService {
         .map((character) => {
           const dkpEntry = new entities.DkpHistory();
           const data = players.find(({ attributes: player }) => (
-            player.playername === character.name
+            player.playername.toLowerCase() === character.name.toLowerCase()
           ));
 
           if (!data) {
@@ -108,6 +104,8 @@ export default class DkpService {
 
       return {};
     } catch (err) {
+      console.error(err);
+
       if (err && err.errno === ERROR_NUM.DUPLICATE_ENTRY) {
         throw new BadRequestException('Export already submitted.');
       }
