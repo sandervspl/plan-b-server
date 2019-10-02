@@ -96,9 +96,9 @@ export default class DkpService {
       // Save new entries to DB
       await this.DkpHistoryRepo.save(dkpEntries);
 
-      // Update character entries with new total DKP
+      // Update character entries with current DKP
       const updates = characterData.map((data) => {
-        const dkp = Number(data.total);
+        const dkp = Number(data.net);
 
         return new Promise((res) => (
           this.CharacterRepo.update({ name: data.playername }, { dkp }).then(res)
