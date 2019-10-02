@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException, BadRequestException } from '@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import convert from 'xml-js';
+import _ from 'lodash';
 import { ERROR_NUM } from 'helpers';
 import * as entities from 'entities';
 import * as DkpTypes from 'services/v1/Dkp/types';
@@ -36,12 +37,34 @@ export default class DkpService {
 
       // Look up character entries from names in XML
       const playerNames = players.map(({ attributes: player }) => player.playername);
+
+      /**
+       * @todo Also return a list of characters that were NOT matched
+       * then create new entries for those characters
+       * */
       const characters = await this.CharacterRepo.find({
         where: In(playerNames),
       });
 
+      // Check for missing characters
+      const characterNames = characters.map((character) => character.name);
+      const diffCharacters = _.difference(playerNames, characterNames);
+
+      // Create new batch of characters
+      const newCharacters = diffCharacters.map((name) => {
+        const character = new entities.Character();
+        character.name = name;
+
+        return character;
+      });
+
+      // Batch upsert new characters
+      await this.CharacterRepo.save(newCharacters);
+
       // Generate new Dkp History entries + character's raid data
-      const entries = characters
+      const allCharacters = await this.CharacterRepo.find();
+
+      const entries = allCharacters
         .map((character) => {
           const dkpEntry = new entities.DkpHistory();
           const data = players.find(({ attributes: player }) => (
