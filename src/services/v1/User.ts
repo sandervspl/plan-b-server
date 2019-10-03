@@ -53,7 +53,7 @@ export default class UserService {
     try {
       const character = await this.characterRepo.findOneOrFail({
         where: {
-          name: body.characterName,
+          name: body.characterName.toLowerCase(),
         },
       });
 
@@ -72,7 +72,7 @@ export default class UserService {
   public createCharacter = async (body: i.CreateCharacterBody) => {
     try {
       const character = new entities.Character();
-      character.name = body.characterName;
+      character.name = body.characterName.toLowerCase();
 
       const newCharacter = await this.characterRepo.save(character);
 
