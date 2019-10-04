@@ -43,11 +43,15 @@ export default class AuthService {
       { failureRedirect: this.failRedirect('discord') },
       (err, user?: i.UserData) => {
         if (err) {
+          console.error('AUTH:', 'Passport auth error.', err);
           return next(err);
         }
 
         // Only guild members are allowed to sign in
         if (!user || !this.getGuildMember(user.id)) {
+          console.error('AUTH:', 'No user found or user is not part of the guild');
+          console.error('user:', user);
+
           return res
             .status(RESPONSE_CODE.UNAUTHORIZED)
             .redirect(this.failRedirect('auth'));
@@ -56,6 +60,8 @@ export default class AuthService {
         // Save user to session under "req.user"
         req.login(user, async (err) => {
           if (err) {
+            console.error('AUTH:', 'request login error.', err);
+
             res
               .status(RESPONSE_CODE.INTERNAL_SERVER_ERR)
               .redirect(this.failRedirect('server'));
@@ -72,6 +78,8 @@ export default class AuthService {
               // Redirect to website
               res.redirect(websiteDomain);
             } catch (err) {
+              console.error('AUTH:', 'User update error.', err);
+
               return res
                 .status(RESPONSE_CODE.INTERNAL_SERVER_ERR)
                 .redirect(this.failRedirect('server'));
