@@ -17,7 +17,3 @@ export type ApplicationMessagesQuery = {
 export type SingleApplicationParam = {
   id: number;
 }
-
-export type SinglePublicApplicationParam = {
-  uuid: string;
-}

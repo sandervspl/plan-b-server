@@ -28,9 +28,14 @@ export default class RecruitmentService {
 
   public applications = async (status: i.ApplicationStatus, type: i.ViewableType = 'private') => {
     try {
+      const sort = sortByDate('desc');
+
       const res = await fetch(`${config.cmsDomain}/applications`);
       const data: i.CmsApplicationResponse[] = await res.json();
-      const sort = sortByDate('desc');
+
+      // Fetch all application UUIDs
+      /** @todo fetch only applications with given status (needs applications moved to DB) */
+      const applicationsUuids = await this.applicationUuidRepo.find();
 
       const applications = data
         // Filter out applications with requested status
@@ -52,28 +57,16 @@ export default class RecruitmentService {
         },
       });
 
-      const response = applications.map((app) => ({
-        ...app,
-        commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
-      }));
-
-      return response;
-    } catch (err) {
-      throw new InternalServerErrorException(null, err);
-    }
-  }
-
-  public publicApplications = async (status: i.ApplicationStatus) => {
-    try {
-      const applications = await this.applicationUuidRepo.find();
-      const cmsApplications = await this.applications(status, 'public');
-
-      const response = cmsApplications
-        .filter((app) => applications.find((uuidApp) => uuidApp.applicationId === app.id))
+      const response = applications
+        .filter((app) => applicationsUuids.find((appUuid) => appUuid.applicationId === app.id))
+        // Map UUID to application
         .map((app) => ({
           ...app,
-          public: applications.find((uuidApp) => uuidApp.applicationId === app.id),
-        }));
+          commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
+          uuid: (applicationsUuids.find((appUuid) => appUuid.applicationId === app.id) || {}).uuid,
+        }))
+        // Remove ID from app body
+        .map(({ id, ...app }) => app);
 
       return response;
     } catch (err) {

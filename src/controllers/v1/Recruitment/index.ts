@@ -3,8 +3,7 @@ import { Controller, Get, Post, Put, UseGuards, Param, Body, Query } from '@nest
 import RecruitmentService from 'services/v1/Recruitment';
 import { AdminGuard } from 'guards/auth';
 import {
-  ApplicationsParam, SingleApplicationParam, SinglePublicApplicationParam, ApplicationMessagesParam,
-  ApplicationMessagesQuery,
+  ApplicationsParam, SingleApplicationParam, ApplicationMessagesParam, ApplicationMessagesQuery,
 } from './types';
 
 @Controller('recruitment')
@@ -19,11 +18,6 @@ export default class RecruitmentController {
     return this.recruitmentService.applications(param.status);
   }
 
-  @Get('/applications/public/:status')
-  private async publicApplications(@Param() param: ApplicationsParam) {
-    return this.recruitmentService.publicApplications(param.status);
-  }
-
   @Post('/application')
   private async addApplication(@Body() body: i.AddApplicationRequestBody) {
     return this.recruitmentService.addApplication(body);
@@ -33,11 +27,6 @@ export default class RecruitmentController {
   @UseGuards(AdminGuard)
   private async singleApplication(@Param() param: SingleApplicationParam) {
     return this.recruitmentService.singleApplication(param.id);
-  }
-
-  @Get('/application/public/:uuid')
-  private async singlePublicApplication(@Param() param: SinglePublicApplicationParam) {
-    return this.recruitmentService.singlePublicApplication(param.uuid);
   }
 
   // @TODO test if possible to see officer messages without Auth
