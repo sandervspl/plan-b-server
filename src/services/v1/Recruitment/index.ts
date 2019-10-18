@@ -41,9 +41,7 @@ export default class RecruitmentService {
         // Filter out applications with requested status
         .filter((app) => app.status === status)
         // Sort by date, descending
-        .sort((a, b) => sort(a.created_at, b.created_at))
-        // Fix data response
-        .map(this.generateApplicationBody);
+        .sort((a, b) => sort(a.created_at, b.created_at));
 
       if (applications.length === 0) {
         return [];
@@ -65,8 +63,8 @@ export default class RecruitmentService {
           commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
           uuid: (applicationsUuids.find((appUuid) => appUuid.applicationId === app.id) || {}).uuid,
         }))
-        // Remove ID from app body
-        .map(({ id, ...app }) => app);
+        // Fix data response
+        .map((app) => this.generateApplicationBody(app, app.uuid!));
 
       return response;
     } catch (err) {
@@ -93,7 +91,7 @@ export default class RecruitmentService {
         user: this.getPublicUser(vote.user),
       }));
 
-      const applicationBody = this.generateApplicationBody(data);
+      const applicationBody = this.generateApplicationBody(data, uuid);
 
       return {
         ...applicationBody,
@@ -106,8 +104,6 @@ export default class RecruitmentService {
 
   public getComments = async (uuid: string, type: i.CommentType) => {
     const messagesTypeQuery: Record<string, number> = {};
-
-    console.log(uuid);
 
     // Get comment type
     messagesTypeQuery.public = Number(type === 'public');
@@ -136,10 +132,12 @@ export default class RecruitmentService {
     }
   }
 
-  public addComment = async (applicationId: number, body: i.AddApplicationCommentBody) => {
+  public addComment = async (uuid: string, body: i.AddApplicationCommentBody) => {
     try {
+      const application = await this.getApplicationByUuid(uuid);
+
       const newComment = new entities.ApplicationMessage();
-      newComment.applicationId = applicationId;
+      newComment.applicationId = application.applicationId;
       newComment.text = body.comment;
       newComment.public = body.isPublic;
       newComment.user = await this.userRepo.findOneOrFail(body.userId);
@@ -157,7 +155,7 @@ export default class RecruitmentService {
     }
   }
 
-  public addApplicationVote = async (applicationId: number, body: i.AddApplicationVoteBody) => {
+  public addApplicationVote = async (uuid: string, body: i.AddApplicationVoteBody) => {
     try {
       const user = await this.userRepo.findOneOrFail(body.userId);
 
@@ -290,7 +288,7 @@ export default class RecruitmentService {
     }
   }
 
-  public updateApplicationStatus = async (applicationId: number, body: i.UpdateApplicationStatusBody) => {
+  public updateApplicationStatus = async (uuid: string, body: i.UpdateApplicationStatusBody) => {
     try {
       const response = await fetch(`${config.cmsDomain}/applications/${applicationId}`, {
         method: 'PUT',
@@ -332,7 +330,7 @@ export default class RecruitmentService {
     return _.pick(user, safeData);
   }
 
-  private generateApplicationBody = (application: i.CmsApplicationResponse) => {
+  private generateApplicationBody = (application: i.CmsApplicationResponse, uuid: string) => {
     const getProfessionLevel = (id: number) => {
       const detail = application.applicationprofessions.find((proffDetail) => (
         proffDetail.profession === id
@@ -342,7 +340,7 @@ export default class RecruitmentService {
     };
 
     return {
-      id: application.id,
+      uuid,
       created_at: application.created_at,
       updated_at: application.updated_at,
       status: application.status,
