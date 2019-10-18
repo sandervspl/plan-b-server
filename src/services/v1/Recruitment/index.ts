@@ -98,6 +98,7 @@ export default class RecruitmentService {
         votes,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(null, err);
     }
   }

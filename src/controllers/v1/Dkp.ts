@@ -2,7 +2,7 @@ import {
   Controller, Post, UseInterceptors, FileInterceptor, UploadedFile, UseGuards, Get, Body,
 } from '@nestjs/common';
 import DkpService from 'services/v1/Dkp';
-import { AdminGuard } from 'guards/auth';
+import { AdminGuard } from 'guards/admin';
 
 @Controller('dkp')
 export default class DkpController {

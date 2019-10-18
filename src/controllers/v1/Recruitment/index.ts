@@ -1,7 +1,8 @@
 import * as i from 'types';
-import { Controller, Get, Post, Put, UseGuards, Param, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, UseGuards, Param, Body, Query, Req, UnauthorizedException } from '@nestjs/common';
+import { Request } from 'express';
 import RecruitmentService from 'services/v1/Recruitment';
-import { AdminGuard } from 'guards/auth';
+import { UserGuard, AdminGuard } from 'guards';
 import {
   ApplicationsParam, SingleApplicationParam, ApplicationMessagesParam, ApplicationMessagesQuery,
 } from './types';
@@ -13,7 +14,7 @@ export default class RecruitmentController {
   ) {}
 
   @Get('/applications/:status')
-  @UseGuards(AdminGuard)
+  @UseGuards(UserGuard)
   private async applications(@Param() param: ApplicationsParam) {
     return this.recruitmentService.applications(param.status);
   }
@@ -24,7 +25,6 @@ export default class RecruitmentController {
   }
 
   @Get('/application/:uuid')
-  @UseGuards(AdminGuard)
   private async singleApplication(@Param() param: SingleApplicationParam) {
     return this.recruitmentService.singleApplication(param.uuid);
   }
@@ -32,13 +32,19 @@ export default class RecruitmentController {
   // @TODO test if possible to see officer messages without Auth
   @Get('/application/:uuid/comments')
   private async getComments(
-    @Param() param: ApplicationMessagesParam, @Query() query: ApplicationMessagesQuery
+    @Req() req: Request,
+    @Param() param: ApplicationMessagesParam,
+    @Query() query: ApplicationMessagesQuery
   ) {
+    if (query.type === 'private' && !req.session) {
+      throw new UnauthorizedException();
+    }
+
     return this.recruitmentService.getComments(param.uuid, query.type);
   }
 
   @Post('/application/:uuid/comment')
-  @UseGuards(AdminGuard)
+  @UseGuards(UserGuard)
   private async addApplicationComment(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationCommentBody
   ) {
