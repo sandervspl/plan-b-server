@@ -158,9 +158,10 @@ export default class RecruitmentService {
   public addApplicationVote = async (uuid: string, body: i.AddApplicationVoteBody) => {
     try {
       const user = await this.userRepo.findOneOrFail(body.userId);
+      const application = await this.getApplicationByUuid(uuid);
 
       const newVote = new entities.ApplicationVote();
-      newVote.applicationId = applicationId;
+      newVote.applicationId = application.applicationId;
       newVote.vote = body.vote;
       newVote.user = user;
 
@@ -290,7 +291,8 @@ export default class RecruitmentService {
 
   public updateApplicationStatus = async (uuid: string, body: i.UpdateApplicationStatusBody) => {
     try {
-      const response = await fetch(`${config.cmsDomain}/applications/${applicationId}`, {
+      const application = await this.getApplicationByUuid(uuid);
+      const response = await fetch(`${config.cmsDomain}/applications/${application.applicationId}`, {
         method: 'PUT',
         body: JSON.stringify({
           status: body.status,
@@ -302,7 +304,7 @@ export default class RecruitmentService {
       });
       const updatedApplication: i.CmsApplicationResponse = await response.json();
 
-      return this.generateApplicationBody(updatedApplication);
+      return this.generateApplicationBody(updatedApplication, uuid);
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
