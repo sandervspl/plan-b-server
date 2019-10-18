@@ -23,10 +23,10 @@ export default class RecruitmentController {
     return this.recruitmentService.addApplication(body);
   }
 
-  @Get('/application/:id')
+  @Get('/application/:uuid')
   @UseGuards(AdminGuard)
   private async singleApplication(@Param() param: SingleApplicationParam) {
-    return this.recruitmentService.singleApplication(param.id);
+    return this.recruitmentService.singleApplication(param.uuid);
   }
 
   // @TODO test if possible to see officer messages without Auth
@@ -34,7 +34,7 @@ export default class RecruitmentController {
   private async getComments(
     @Param() param: ApplicationMessagesParam, @Query() query: ApplicationMessagesQuery
   ) {
-    return this.recruitmentService.getComments(param.id, query.type);
+    return this.recruitmentService.getComments(param.uuid, query.type);
   }
 
   @Post('/application/:id/comment')
@@ -42,7 +42,7 @@ export default class RecruitmentController {
   private async addApplicationComment(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationCommentBody
   ) {
-    return this.recruitmentService.addComment(param.id, body);
+    return this.recruitmentService.addComment(param.uuid, body);
   }
 
   @Post('/application/:id/vote')
@@ -50,7 +50,7 @@ export default class RecruitmentController {
   private async addApplicationVote(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationVoteBody
   ) {
-    return this.recruitmentService.addApplicationVote(param.id, body);
+    return this.recruitmentService.addApplicationVote(param.uuid, body);
   }
 
   @Put('/application/:id/status')
@@ -58,6 +58,6 @@ export default class RecruitmentController {
   private async updateApplicationStatus(
     @Param() param: SingleApplicationParam, @Body() body: i.UpdateApplicationStatusBody
   ) {
-    return this.recruitmentService.updateApplicationStatus(param.id, body);
+    return this.recruitmentService.updateApplicationStatus(param.uuid, body);
   }
 }

@@ -7,7 +7,7 @@ export type ApplicationsParam = {
 }
 
 export type ApplicationMessagesParam = {
-  id: number;
+  uuid: string;
 }
 
 export type ApplicationMessagesQuery = {
@@ -15,5 +15,5 @@ export type ApplicationMessagesQuery = {
 }
 
 export type SingleApplicationParam = {
-  id: number;
+  uuid: string;
 }

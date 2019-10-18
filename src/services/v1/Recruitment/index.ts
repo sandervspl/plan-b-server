@@ -74,14 +74,20 @@ export default class RecruitmentService {
     }
   }
 
-  public singleApplication = async (id: number) => {
+  public singleApplication = async (uuid: string) => {
     try {
-      const res = await fetch(`${config.cmsDomain}/applications/${id}`);
+      const application = await this.applicationUuidRepo.findOne({ where: { uuid } });
+
+      if (!application) {
+        throw new NotFoundException('No application found with UUID');
+      }
+
+      const res = await fetch(`${config.cmsDomain}/applications/${application.applicationId}`);
       const data: i.CmsApplicationResponse = await res.json();
 
       let votes: entities.ApplicationVote[] = await this.applicationVoteRepo.find({
         where: {
-          applicationId: id,
+          applicationId: application.applicationId,
         },
         relations: ['user'],
       });
@@ -97,27 +103,6 @@ export default class RecruitmentService {
         ...applicationBody,
         votes,
       };
-    } catch (err) {
-      throw new InternalServerErrorException(null, err);
-    }
-  }
-
-  public singlePublicApplication = async (uuid: string) => {
-    try {
-      const application = await this.applicationUuidRepo.findOne({ where: { uuid } });
-      if (!application) {
-        throw new NotFoundException();
-      }
-
-      const applicationDetail = await this.singleApplication(application.applicationId);
-
-      if (!applicationDetail) {
-        throw new NotFoundException();
-      }
-
-      delete applicationDetail.votes;
-
-      return applicationDetail;
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }

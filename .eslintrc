@@ -31,7 +31,7 @@
       }
     }],
     "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
-    "no-console": [2, { "allow": ["info", "error"]}],
+    "no-console": [0, { "allow": ["info", "error"]}],
     "no-trailing-spaces": ["error"],
     "object-curly-spacing": ["error", "always"],
     "prefer-const": ["error"],

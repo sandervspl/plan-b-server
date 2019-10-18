@@ -23,6 +23,7 @@ export default class AuthService {
   ) {
     discordBot.client.on('ready', () => {
       console.log('Discord bot client ready in AuthService.');
+
       this.guild = discordBot.client.guilds.get(secretConfig.discord.planBServerId);
 
       console.log('guild:', !!this.guild);
@@ -30,6 +31,14 @@ export default class AuthService {
   }
 
   public auth: ExpressParamsFn = (req, res, next) => {
+    if (!this.guild) {
+      console.log('Server had no guild registered, trying again.');
+
+      this.guild = discordBot.client.guilds.get(secretConfig.discord.planBServerId);
+
+      console.log('guild:', !!this.guild);
+    }
+
     const fn = passport.authenticate('discord', {
       scope: discordConfig.scopes,
       failureRedirect: this.failRedirect(),
