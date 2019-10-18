@@ -30,14 +30,14 @@ export default class RecruitmentController {
   }
 
   // @TODO test if possible to see officer messages without Auth
-  @Get('/application/:id/messages')
+  @Get('/application/:uuid/comments')
   private async getComments(
     @Param() param: ApplicationMessagesParam, @Query() query: ApplicationMessagesQuery
   ) {
     return this.recruitmentService.getComments(param.uuid, query.type);
   }
 
-  @Post('/application/:id/comment')
+  @Post('/application/:uuid/comment')
   @UseGuards(AdminGuard)
   private async addApplicationComment(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationCommentBody
@@ -45,7 +45,7 @@ export default class RecruitmentController {
     return this.recruitmentService.addComment(param.uuid, body);
   }
 
-  @Post('/application/:id/vote')
+  @Post('/application/:uuid/vote')
   @UseGuards(AdminGuard)
   private async addApplicationVote(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationVoteBody
@@ -53,7 +53,7 @@ export default class RecruitmentController {
     return this.recruitmentService.addApplicationVote(param.uuid, body);
   }
 
-  @Put('/application/:id/status')
+  @Put('/application/:uuid/status')
   @UseGuards(AdminGuard)
   private async updateApplicationStatus(
     @Param() param: SingleApplicationParam, @Body() body: i.UpdateApplicationStatusBody

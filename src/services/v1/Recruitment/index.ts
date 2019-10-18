@@ -26,7 +26,7 @@ export default class RecruitmentService {
     private readonly userRepo: Repository<entities.User>,
   ) {}
 
-  public applications = async (status: i.ApplicationStatus, type: i.ViewableType = 'private') => {
+  public applications = async (status: i.ApplicationStatus, type: i.CommentType = 'private') => {
     try {
       const sort = sortByDate('desc');
 
@@ -76,11 +76,7 @@ export default class RecruitmentService {
 
   public singleApplication = async (uuid: string) => {
     try {
-      const application = await this.applicationUuidRepo.findOne({ where: { uuid } });
-
-      if (!application) {
-        throw new NotFoundException('No application found with UUID');
-      }
+      const application = await this.getApplicationByUuid(uuid);
 
       const res = await fetch(`${config.cmsDomain}/applications/${application.applicationId}`);
       const data: i.CmsApplicationResponse = await res.json();
@@ -108,17 +104,20 @@ export default class RecruitmentService {
     }
   }
 
-  public getComments = async (applicationId: number, type: i.ViewableType) => {
+  public getComments = async (uuid: string, type: i.CommentType) => {
     const messagesTypeQuery: Record<string, number> = {};
 
-    if (type !== 'all') {
-      messagesTypeQuery.public = Number(type === 'public');
-    }
+    console.log(uuid);
+
+    // Get comment type
+    messagesTypeQuery.public = Number(type === 'public');
 
     try {
+      const application = await this.getApplicationByUuid(uuid);
+
       let messages = await this.applicationMessageRepo.find({
         where: {
-          applicationId,
+          applicationId: application.applicationId,
           ...messagesTypeQuery,
         },
         order: {
@@ -311,6 +310,16 @@ export default class RecruitmentService {
     }
   }
 
+
+  private getApplicationByUuid = async (uuid: string): Promise<entities.ApplicationUuid> => {
+    const application = await this.applicationUuidRepo.findOne({ where: { uuid } });
+
+    if (!application) {
+      throw new NotFoundException('No application found with UUID');
+    }
+
+    return application;
+  }
 
   private getPublicUser = (user: entities.User) => {
     const safeData: (keyof typeof user)[] = [
