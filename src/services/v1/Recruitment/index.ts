@@ -117,6 +117,7 @@ export default class RecruitmentService {
         where: {
           applicationId: application.applicationId,
           ...messagesTypeQuery,
+          deletedAt: null,
         },
         order: {
           createdAt: 'DESC',
