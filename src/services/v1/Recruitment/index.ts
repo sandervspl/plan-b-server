@@ -55,16 +55,19 @@ export default class RecruitmentService {
         },
       });
 
+      console.log(comments);
+
       const response = applications
         .filter((app) => applicationsUuids.find((appUuid) => appUuid.applicationId === app.id))
         // Map UUID to application
         .map((app) => ({
           ...app,
-          commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
           uuid: (applicationsUuids.find((appUuid) => appUuid.applicationId === app.id) || {}).uuid,
         }))
         // Fix data response
-        .map((app) => this.generateApplicationBody(app, app.uuid!));
+        .map((app) => this.generateApplicationBody(app, app.uuid!, {
+          commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
+        }));
 
       return response;
     } catch (err) {
@@ -333,7 +336,7 @@ export default class RecruitmentService {
     return _.pick(user, safeData);
   }
 
-  private generateApplicationBody = (application: i.CmsApplicationResponse, uuid: string) => {
+  private generateApplicationBody = (application: i.CmsApplicationResponse, uuid: string, extraProps?: object) => {
     const getProfessionLevel = (id: number) => {
       const detail = application.applicationprofessions.find((proffDetail) => (
         proffDetail.profession === id
@@ -382,6 +385,7 @@ export default class RecruitmentService {
         reason: application.reason,
       },
       social: application.social,
+      ...extraProps,
     };
   }
 }
