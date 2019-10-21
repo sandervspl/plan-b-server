@@ -55,8 +55,6 @@ export default class RecruitmentService {
         },
       });
 
-      console.log(comments);
-
       const response = applications
         .filter((app) => applicationsUuids.find((appUuid) => appUuid.applicationId === app.id))
         // Map UUID to application
@@ -154,6 +152,25 @@ export default class RecruitmentService {
       };
 
       return response;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
+  public deleteComment = async (id: number) => {
+    try {
+      const comment = await this.applicationMessageRepo.findOne(id);
+
+      if (!comment) {
+        throw new NotFoundException('No comment found with id');
+      }
+
+      comment.deletedAt = new Date();
+
+      // Upsert
+      await this.applicationMessageRepo.save(comment);
+
+      return {};
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }

@@ -34,6 +34,12 @@ class ApplicationMessage {
   })
   public!: i.PUBLIC_MESSAGE;
 
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  deletedAt!: Date;
+
   @CreateDateColumn()
   createdAt!: string;
 
