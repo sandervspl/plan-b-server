@@ -26,7 +26,7 @@ export default class RecruitmentService {
     private readonly userRepo: Repository<entities.User>,
   ) {}
 
-  public applications = async (status: i.ApplicationStatus, type: i.CommentType = 'private') => {
+  public applications = async (status: i.ApplicationStatus) => {
     try {
       const sort = sortByDate('desc');
 
@@ -51,7 +51,7 @@ export default class RecruitmentService {
       const comments = await this.applicationMessageRepo.find({
         where: {
           applicationId: In(applications.map((app) => app.id)),
-          public: Number(type === 'public'),
+          public: 1,
         },
       });
 
