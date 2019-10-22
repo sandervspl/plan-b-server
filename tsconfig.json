@@ -25,5 +25,6 @@
         },
         "lib": ["esnext", "dom"]
     },
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules"],
+    "include": ["src/types/declarations.d.ts"]
 }
