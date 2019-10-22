@@ -1,10 +1,13 @@
 import * as i from 'types';
-import { Controller, Get, Post, Put, UseGuards, Param, Body, Query, Req, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller, Get, Post, Put, UseGuards, Param, Body, Query, Req, UnauthorizedException, Delete,
+} from '@nestjs/common';
 import { Request } from 'express';
 import RecruitmentService from 'services/v1/Recruitment';
 import { UserGuard, AdminGuard } from 'guards';
 import {
   ApplicationsParam, SingleApplicationParam, ApplicationMessagesParam, ApplicationMessagesQuery,
+  DeleteCommentParam,
 } from './types';
 
 @Controller('recruitment')
@@ -49,6 +52,12 @@ export default class RecruitmentController {
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationCommentBody
   ) {
     return this.recruitmentService.addComment(param.uuid, body);
+  }
+
+  @Delete('/application/comment/:id')
+  @UseGuards(UserGuard)
+  private async deleteApplicationComment(@Param() param: DeleteCommentParam) {
+    return this.recruitmentService.deleteComment(param.id);
   }
 
   @Post('/application/:uuid/vote')

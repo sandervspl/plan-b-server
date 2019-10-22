@@ -26,7 +26,7 @@ export default class RecruitmentService {
     private readonly userRepo: Repository<entities.User>,
   ) {}
 
-  public applications = async (status: i.ApplicationStatus, type: i.CommentType = 'private') => {
+  public applications = async (status: i.ApplicationStatus) => {
     try {
       const sort = sortByDate('desc');
 
@@ -51,7 +51,7 @@ export default class RecruitmentService {
       const comments = await this.applicationMessageRepo.find({
         where: {
           applicationId: In(applications.map((app) => app.id)),
-          public: Number(type === 'public'),
+          public: 1,
         },
       });
 
@@ -60,11 +60,12 @@ export default class RecruitmentService {
         // Map UUID to application
         .map((app) => ({
           ...app,
-          commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
           uuid: (applicationsUuids.find((appUuid) => appUuid.applicationId === app.id) || {}).uuid,
         }))
         // Fix data response
-        .map((app) => this.generateApplicationBody(app, app.uuid!));
+        .map((app) => this.generateApplicationBody(app, app.uuid!, {
+          commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
+        }));
 
       return response;
     } catch (err) {
@@ -116,6 +117,7 @@ export default class RecruitmentService {
         where: {
           applicationId: application.applicationId,
           ...messagesTypeQuery,
+          deletedAt: null,
         },
         order: {
           createdAt: 'DESC',
@@ -151,6 +153,25 @@ export default class RecruitmentService {
       };
 
       return response;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
+  public deleteComment = async (id: number) => {
+    try {
+      const comment = await this.applicationMessageRepo.findOne(id);
+
+      if (!comment) {
+        throw new NotFoundException('No comment found with id');
+      }
+
+      comment.deletedAt = new Date();
+
+      // Upsert
+      await this.applicationMessageRepo.save(comment);
+
+      return {};
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
@@ -333,7 +354,7 @@ export default class RecruitmentService {
     return _.pick(user, safeData);
   }
 
-  private generateApplicationBody = (application: i.CmsApplicationResponse, uuid: string) => {
+  private generateApplicationBody = (application: i.CmsApplicationResponse, uuid: string, extraProps?: object) => {
     const getProfessionLevel = (id: number) => {
       const detail = application.applicationprofessions.find((proffDetail) => (
         proffDetail.profession === id
@@ -382,6 +403,7 @@ export default class RecruitmentService {
         reason: application.reason,
       },
       social: application.social,
+      ...extraProps,
     };
   }
 }

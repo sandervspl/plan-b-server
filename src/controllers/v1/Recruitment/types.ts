@@ -17,3 +17,7 @@ export type ApplicationMessagesQuery = {
 export type SingleApplicationParam = {
   uuid: string;
 }
+
+export type DeleteCommentParam = {
+  id: number;
+}
