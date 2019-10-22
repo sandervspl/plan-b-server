@@ -23,8 +23,8 @@
             "modules/*": ["modules/*"],
             "types/*": ["types/*"]
         },
-        "lib": ["esnext", "dom"]
+        "lib": ["esnext", "dom"],
+        "types": ["./src/types/declarations.d.ts"]
     },
-    "exclude": ["node_modules"],
-    "include": ["src/types/declarations.d.ts"]
+    "exclude": ["node_modules"]
 }
