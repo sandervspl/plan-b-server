@@ -117,17 +117,25 @@ export default class RecruitmentService {
         where: {
           applicationId: application.applicationId,
           ...messagesTypeQuery,
-          deletedAt: null,
         },
         order: {
           createdAt: 'DESC',
         },
       });
 
-      messages = messages.map((msg) => ({
-        ...msg,
-        user: this.getPublicUser(msg.user),
-      }));
+      messages = messages.map((msg) => {
+        let text = msg.text;
+
+        if (msg.deletedAt) {
+          text = '[deleted]';
+        }
+
+        return {
+          ...msg,
+          text,
+          user: this.getPublicUser(msg.user),
+        };
+      });
 
       return messages;
     } catch (err) {
