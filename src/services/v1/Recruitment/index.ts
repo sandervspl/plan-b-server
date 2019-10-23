@@ -15,6 +15,8 @@ import { PrimaryProfession } from './types/AddApplicationRequestBody';
 
 @Injectable()
 export default class RecruitmentService {
+  private readonly DELETED_TEXT = '[deleted]';
+
   constructor(
     @InjectRepository(entities.ApplicationMessage)
     private readonly applicationMessageRepo: Repository<entities.ApplicationMessage>,
@@ -126,10 +128,19 @@ export default class RecruitmentService {
       messages = messages.map((msg) => {
         let text = msg.text;
 
+        // Deleted message
         if (msg.deletedAt) {
-          text = '[deleted]';
+          text = this.DELETED_TEXT;
+          const user = this.getDeletedCommentUser(msg.user);
+
+          return {
+            ...msg,
+            text,
+            user,
+          };
         }
 
+        // Normal message
         return {
           ...msg,
           text,
@@ -177,9 +188,12 @@ export default class RecruitmentService {
       comment.deletedAt = new Date();
 
       // Upsert
-      await this.applicationMessageRepo.save(comment);
+      const deletedComment = await this.applicationMessageRepo.save(comment);
 
-      return {};
+      deletedComment.text = this.DELETED_TEXT;
+      deletedComment.user = this.getDeletedCommentUser(deletedComment.user);
+
+      return deletedComment;
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
@@ -349,6 +363,18 @@ export default class RecruitmentService {
     }
 
     return application;
+  }
+
+  private getDeletedCommentUser = (user: entities.User) => {
+    const delUser = this.getPublicUser({ ...user });
+
+    delUser.avatar = '';
+    delUser.username = this.DELETED_TEXT;
+    delUser.authLevel = 0;
+
+    delete delUser.id;
+
+    return delUser;
   }
 
   private getPublicUser = (user: entities.User) => {
