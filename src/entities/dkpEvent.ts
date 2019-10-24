@@ -1,11 +1,10 @@
 import {
-  Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany, Unique,
+  Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany,
 } from 'typeorm';
 import { DkpHistory } from 'entities';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 @Entity()
-@Unique(['time'])
 class DkpEvent {
   @PrimaryGeneratedColumn({
     type: 'int',
@@ -23,9 +22,10 @@ class DkpEvent {
   exporter!: string;
 
   @Column({
-    type: 'varchar',
+    type: 'int',
+    unique: true,
   })
-  time!: string;
+  time!: number;
 
   @OneToMany((type) => DkpHistory, (dkpHistory) => dkpHistory.event)
   dkpHistory!: DkpHistory;

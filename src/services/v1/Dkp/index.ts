@@ -13,6 +13,8 @@ export default class DkpService {
   constructor(
     @InjectRepository(entities.DkpHistory)
     private readonly DkpHistoryRepo: Repository<entities.DkpHistory>,
+    @InjectRepository(entities.DkpEvent)
+    private readonly DkpEventRepo: Repository<entities.DkpEvent>,
     @InjectRepository(entities.Character)
     private readonly CharacterRepo: Repository<entities.Character>,
   ) {}
@@ -34,6 +36,14 @@ export default class DkpService {
           playername: element.attributes.playername.split('-')[0], // Remove server from name
         },
       }));
+
+      // Create and upsert dkp event
+      const dkpEvent = new entities.DkpEvent();
+      dkpEvent.name = name;
+      dkpEvent.exporter = raidData.attributes.exporter;
+      dkpEvent.time = Number(raidData.attributes.time);
+
+      await this.DkpEventRepo.save(dkpEvent);
 
       // Look up character entries from names in XML
       const playerNames = players.map(({ attributes: player }) => player.playername.toLowerCase());
@@ -63,6 +73,7 @@ export default class DkpService {
       const entries = allCharacters
         .map((character) => {
           const dkpEntry = new entities.DkpHistory();
+
           const data = players.find(({ attributes: player }) => (
             player.playername.toLowerCase() === character.name.toLowerCase()
           ));
@@ -78,9 +89,7 @@ export default class DkpService {
           dkpEntry.spent = Number(characterRaidData.spent);
           dkpEntry.total = Number(characterRaidData.total);
           dkpEntry.hours = Number(characterRaidData.hours);
-          dkpEntry.exporter = raidData.attributes.exporter;
-          dkpEntry.exportTime = Number(raidData.attributes.time);
-          dkpEntry.event = name;
+          dkpEntry.event = dkpEvent;
 
           return [dkpEntry, characterRaidData] as const;
         })
@@ -117,7 +126,7 @@ export default class DkpService {
   public getAverageGuildDkp = async () => {
     // Get all characters
     const characters = await this.CharacterRepo.find({
-      relations: ['dkpHistories'],
+      relations: ['dkpHistories', 'dkpHistories.event'],
     });
 
     // Get total current DKP by export times
@@ -125,12 +134,12 @@ export default class DkpService {
       character.dkpHistories.forEach((entry) => {
         prev = {
           ...prev,
-          [entry.exportTime]: {
-            ...prev[entry.exportTime],
-            dkp: prev[entry.exportTime]
-              ? prev[entry.exportTime].dkp + entry.net
+          [entry.event.time]: {
+            ...prev[entry.event.time],
+            dkp: prev[entry.event.time]
+              ? prev[entry.event.time].dkp + entry.net
               : entry.net,
-            count: prev[entry.exportTime] ? prev[entry.exportTime].count + 1 : 1,
+            count: prev[entry.event.time] ? prev[entry.event.time].count + 1 : 1,
             date: entry.createdAt,
           },
         };
