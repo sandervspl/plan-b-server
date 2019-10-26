@@ -107,34 +107,34 @@ export default class RecruitmentService {
   }
 
   public getComments = async (uuid: string, type: i.CommentType) => {
-    const messagesTypeQuery: Record<string, number> = {};
+    const commentsTypeQuery: Record<string, number> = {};
 
     // Get comment type
-    messagesTypeQuery.public = Number(type === 'public');
+    commentsTypeQuery.public = Number(type === 'public');
 
     try {
       const application = await this.getApplicationByUuid(uuid);
 
-      let messages = await this.applicationMessageRepo.find({
+      let comments = await this.applicationMessageRepo.find({
         where: {
           applicationId: application.applicationId,
-          ...messagesTypeQuery,
+          ...commentsTypeQuery,
         },
         order: {
           createdAt: 'DESC',
         },
       });
 
-      messages = messages.map((msg) => {
-        let text = msg.text;
+      comments = comments.map((comment) => {
+        let text = comment.text;
 
         // Deleted message
-        if (msg.deletedAt) {
+        if (comment.deletedAt) {
           text = this.DELETED_TEXT;
-          const user = this.getDeletedCommentUser(msg.user);
+          const user = this.getDeletedCommentUser(comment.user);
 
           return {
-            ...msg,
+            ...comment,
             text,
             user,
           };
@@ -142,13 +142,35 @@ export default class RecruitmentService {
 
         // Normal message
         return {
-          ...msg,
+          ...comment,
           text,
-          user: this.getPublicUser(msg.user),
+          user: this.getPublicUser(comment.user),
         };
       });
 
-      return messages;
+      // Get comments count per type
+      /** @TODO don't return private count if not admin */
+      const count = {
+        public: 0,
+        private: 0,
+      };
+
+      const types: i.CommentType[] = type === 'public'
+        ? ['public', 'private']
+        : ['private', 'public'];
+
+      count[types[0]] = comments.length;
+      count[types[1]] = await this.applicationMessageRepo.count({
+        where: {
+          applicationId: application.applicationId,
+          public: types[0] === 'public' ? 0 : 1,
+        },
+      });
+
+      return {
+        messages: comments,
+        count,
+      };
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
