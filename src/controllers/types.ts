@@ -11,6 +11,7 @@ export type UserData = {
   id: string;
   provider: string;
   accessToken: string;
+  refreshToken: string;
   fetchedAt: Date;
 }
 

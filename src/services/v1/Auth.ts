@@ -79,13 +79,16 @@ export default class AuthService {
               .redirect(this.failRedirect('server'));
           } else {
             try {
-              // Create/update user
+              // Upsert user
               await this.userService.create({
                 id: user.id,
                 username: this.getGuildMember(user.id)!.displayName,
                 avatar: this.getAvatar(user.id, user.avatar),
                 authLevel: this.getAuthLevel(user.id),
               });
+
+              // Save refresh token in session
+              req.user.refreshToken = user.refreshToken;
 
               // Redirect to website
               res.redirect(websiteDomain);
@@ -113,10 +116,7 @@ export default class AuthService {
     const user = req.user as i.AugmentedUser | undefined;
 
     if (!user) {
-      // @TODO this throws frontend in an infinite /me request loop
-      // return res
-      //   .status(RESPONSE_CODE.UNAUTHORIZED)
-      //   .redirect(this.failRedirect('auth'));
+      console.error('No user found');
 
       throw new UnauthorizedException();
     }
@@ -126,6 +126,8 @@ export default class AuthService {
 
     // Only guild members are allowed to sign in
     if (!guildMember) {
+      console.error('No guild member found for user');
+
       return res
         .status(RESPONSE_CODE.UNAUTHORIZED)
         .redirect(this.failRedirect('auth'));
