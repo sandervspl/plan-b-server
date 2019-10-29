@@ -7,7 +7,9 @@ export class UserGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
 
-    if (!req.session || !req.user) {
+    console.log('guard', req.isAuthenticated());
+
+    if (req.isUnauthenticated()) {
       throw new UnauthorizedException();
     }
 

@@ -3,6 +3,7 @@ import {
   Controller, Get, Post, Put, UseGuards, Param, Body, Query, Req, UnauthorizedException, Delete,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 import RecruitmentService from 'services/v1/Recruitment';
 import { UserGuard, AdminGuard } from 'guards';
 import {
@@ -16,9 +17,10 @@ export default class RecruitmentController {
     private readonly recruitmentService: RecruitmentService,
   ) {}
 
+  @UseGuards(AuthGuard())
   @Get('/applications/:status')
-  @UseGuards(UserGuard)
-  private async applications(@Param() param: ApplicationsParam) {
+  private async applications(@Req() req: Request, @Param() param: ApplicationsParam) {
+    console.log('controller', req.isAuthenticated());
     return this.recruitmentService.applications(param.status);
   }
 
@@ -32,44 +34,43 @@ export default class RecruitmentController {
     return this.recruitmentService.singleApplication(param.uuid);
   }
 
-  // @TODO test if possible to see officer messages without Auth
   @Get('/application/:uuid/comments')
   private async getComments(
     @Req() req: Request,
     @Param() param: ApplicationMessagesParam,
     @Query() query: ApplicationMessagesQuery
   ) {
-    if (query.type === 'private' && !req.session) {
+    if (query.type === 'private' && req.isUnauthenticated()) {
       throw new UnauthorizedException();
     }
 
     return this.recruitmentService.getComments(param.uuid, query.type);
   }
 
-  @Post('/application/:uuid/comment')
   @UseGuards(UserGuard)
+  @Post('/application/:uuid/comment')
   private async addApplicationComment(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationCommentBody
   ) {
     return this.recruitmentService.addComment(param.uuid, body);
   }
 
-  @Delete('/application/comment/:id')
   @UseGuards(UserGuard)
+  @Delete('/application/comment/:id')
   private async deleteApplicationComment(@Param() param: DeleteCommentParam) {
     return this.recruitmentService.deleteComment(param.id);
   }
 
-  @Post('/application/:uuid/vote')
   @UseGuards(AdminGuard)
+  @Post('/application/:uuid/vote')
   private async addApplicationVote(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationVoteBody
   ) {
     return this.recruitmentService.addApplicationVote(param.uuid, body);
   }
 
-  @Put('/application/:uuid/status')
   @UseGuards(AdminGuard)
+  @Put('/application/:uuid/status')
   private async updateApplicationStatus(
     @Param() param: SingleApplicationParam, @Body() body: i.UpdateApplicationStatusBody
   ) {

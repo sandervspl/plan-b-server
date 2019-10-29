@@ -22,8 +22,6 @@ export default class AuthService {
     private readonly userService: UserService,
   ) {
     discordBot.client.on('ready', () => {
-      console.log('Discord bot client ready in AuthService.');
-
       this.guild = discordBot.client.guilds.get(secretConfig.discord.planBServerId);
 
       console.log('guild:', !!this.guild);
