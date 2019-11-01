@@ -70,6 +70,9 @@ async function bootstrap() {
   // @ts-ignore this works
   const MysqlStore = mysqlSession(session);
 
+  const maxCookieAge = new Date();
+  maxCookieAge.setFullYear(maxCookieAge.getFullYear() + 1);
+
   const sessionCfg: SessionOptions = {
     secret: secretConfig.sessionSecret,
     name: 'plan-b-auth',
@@ -78,6 +81,7 @@ async function bootstrap() {
     proxy: isProd,
     cookie: {
       secure: isProd,
+      maxAge: maxCookieAge.getTime(),
     },
     store: new MysqlStore(secretConfig.databaseInfo),
   };
