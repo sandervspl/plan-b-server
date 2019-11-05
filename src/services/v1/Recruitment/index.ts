@@ -29,14 +29,16 @@ export default class RecruitmentService {
     private readonly userRepo: Repository<entities.User>,
   ) {}
 
-  public applications = async (status: i.ApplicationStatus) => {
+  public applications = async (status: i.ApplicationStatus, query: i.PaginationQueries) => {
     try {
       const reqQueries = qs.stringify({
         _sort: 'created_at:DESC',
+        _limit: query.limit || 10, // eslint-disable-line no-magic-numbers
+        _start: query.start || 0,
         status,
       });
 
-      const res = await fetch(`${config.cmsDomain}/applications${reqQueries}`);
+      const res = await fetch(`${config.cmsDomain}/applications?${reqQueries}`);
       const applications: i.CmsApplicationResponse[] = await res.json();
 
       // Fetch all application UUIDs

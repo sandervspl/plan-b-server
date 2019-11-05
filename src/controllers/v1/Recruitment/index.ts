@@ -18,8 +18,11 @@ export default class RecruitmentController {
 
   @Get('/applications/:status')
   @UseGuards(UserGuard)
-  private async applications(@Param() param: ApplicationsParam) {
-    return this.recruitmentService.applications(param.status);
+  private async applications(
+    @Param() param: ApplicationsParam,
+    @Query() query: i.PaginationQueries
+  ) {
+    return this.recruitmentService.applications(param.status, query);
   }
 
   @Post('/application')
