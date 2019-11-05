@@ -1,4 +1,5 @@
 import * as i from 'types';
+import qs from 'qs';
 import {
   Injectable, InternalServerErrorException, NotFoundException, BadRequestException,
 } from '@nestjs/common';
@@ -7,7 +8,7 @@ import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import { TextChannel, RichEmbed } from 'discord.js';
-import { sortByDate, generateRandomString, env, ERROR_NUM } from 'helpers';
+import { generateRandomString, env, ERROR_NUM } from 'helpers';
 import discordBot from 'bot/Discord';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
@@ -30,20 +31,17 @@ export default class RecruitmentService {
 
   public applications = async (status: i.ApplicationStatus) => {
     try {
-      const sort = sortByDate('desc');
+      const reqQueries = qs.stringify({
+        _sort: 'created_at:DESC',
+        status,
+      });
 
-      const res = await fetch(`${config.cmsDomain}/applications`);
-      const data: i.CmsApplicationResponse[] = await res.json();
+      const res = await fetch(`${config.cmsDomain}/applications${reqQueries}`);
+      const applications: i.CmsApplicationResponse[] = await res.json();
 
       // Fetch all application UUIDs
       /** @todo fetch only applications with given status (needs applications moved to DB) */
       const applicationsUuids = await this.applicationUuidRepo.find();
-
-      const applications = data
-        // Filter out applications with requested status
-        .filter((app) => app.status === status)
-        // Sort by date, descending
-        .sort((a, b) => sort(a.created_at, b.created_at));
 
       if (applications.length === 0) {
         return [];
