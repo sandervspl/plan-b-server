@@ -53,7 +53,6 @@ export default class RecruitmentService {
       const comments = await this.applicationMessageRepo.find({
         where: {
           applicationId: In(applications.map((app) => app.id)),
-          public: 1,
         },
       });
 
@@ -65,9 +64,16 @@ export default class RecruitmentService {
           uuid: (applicationsUuids.find((appUuid) => appUuid.applicationId === app.id) || {}).uuid,
         }))
         // Fix data response
-        .map((app) => this.generateApplicationBody(app, app.uuid!, {
-          commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
-        }));
+        .map((app) => {
+          const appComments = comments.filter((comment) => comment.applicationId === app.id);
+
+          return this.generateApplicationBody(app, app.uuid!, {
+            comments: {
+              public: appComments.filter((comment) => comment.public).length,
+              private: appComments.filter((comment) => !comment.public).length,
+            },
+          });
+        });
 
       return response;
     } catch (err) {

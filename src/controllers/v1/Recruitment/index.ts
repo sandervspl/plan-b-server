@@ -39,7 +39,7 @@ export default class RecruitmentController {
     @Param() param: ApplicationMessagesParam,
     @Query() query: ApplicationMessagesQuery
   ) {
-    if (query.type === 'private' && !req.session) {
+    if (query.type === 'private' && req.isAuthenticated()) {
       throw new UnauthorizedException();
     }
 
