@@ -85,7 +85,7 @@ async function bootstrap() {
 
   await app.listen(apiConfig.port, () => {
     console.info(
-      `[${process.env.NODE_ENV} / ${process.env.APP_ENV}] Server started on port ${apiConfig.port}`
+      `[${process.env.NODE_ENV} / ${process.env.APP_ENV}] Server started on port ${apiConfig.port} at ${apiConfig.apiDomain}`
     );
   });
 }

@@ -178,7 +178,6 @@ export default class RecruitmentService {
         count,
       };
     } catch (err) {
-      console.log(err);
       throw new InternalServerErrorException(null, err);
     }
   }
