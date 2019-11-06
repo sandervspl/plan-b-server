@@ -89,7 +89,7 @@ export default class UserService {
   public singleCharacter = async (user: i.AugmentedUser) => {
     try {
       const dbUser = await this.userRepo.findOneOrFail(user.id, {
-        relations: ['character', 'character.dkpHistories'],
+        relations: ['character', 'character.dkpHistories', 'character.dkpHistories.event'],
       });
 
       if (!dbUser.character) {
