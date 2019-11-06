@@ -178,6 +178,7 @@ export default class RecruitmentService {
         count,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(null, err);
     }
   }
@@ -381,7 +382,6 @@ export default class RecruitmentService {
       throw new InternalServerErrorException(null, err);
     }
   }
-
 
   private getApplicationByUuid = async (uuid: string): Promise<entities.ApplicationUuid> => {
     const application = await this.applicationUuidRepo.findOne({ where: { uuid } });
