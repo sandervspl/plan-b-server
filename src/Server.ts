@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import DiscordStrategy from 'passport-discord';
-import refresh from 'passport-oauth2-refresh';
 import passport from 'passport';
 import session, { SessionOptions } from 'express-session';
 import mysqlSession from 'express-mysql-session';
@@ -22,11 +21,6 @@ const discordStrategy = new DiscordStrategy(
     scope: discordConfig.scopes,
   },
   (accessToken, refreshToken, user, done) => {
-    // @ts-ignore
-    user.refreshToken = refreshToken;
-
-    refresh.requestNewAccessToken('discord', refreshToken, undefined, done);
-
     process.nextTick(() => {
       return done(null, user);
     });
@@ -41,7 +35,6 @@ passport.deserializeUser((user, done) => {
 });
 
 passport.use(discordStrategy);
-refresh.use(discordStrategy);
 
 async function bootstrap() {
   const app = await NestFactory.create(ApplicationModule);
