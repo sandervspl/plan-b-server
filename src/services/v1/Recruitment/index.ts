@@ -59,10 +59,15 @@ export default class RecruitmentService {
       const response = applications
         .filter((app) => applicationsUuids.find((appUuid) => appUuid.applicationId === app.id))
         // Map UUID to application
-        .map((app) => ({
-          ...app,
-          uuid: (applicationsUuids.find((appUuid) => appUuid.applicationId === app.id) || {}).uuid,
-        }))
+        .map((app) => {
+          const appUuid = applicationsUuids.find((appUuid) => appUuid.applicationId === app.id);
+          const uuid = appUuid && appUuid.uuid;
+
+          return {
+            ...app,
+            uuid,
+          };
+        })
         // Fix data response
         .map((app) => {
           const appComments = comments.filter((comment) => comment.applicationId === app.id);
