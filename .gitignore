@@ -7,3 +7,4 @@ docs/
 Procfile
 herokugit
 src/config/secret.ts
+deploy.sh

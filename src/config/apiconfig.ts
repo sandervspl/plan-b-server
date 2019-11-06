@@ -3,7 +3,7 @@ class Config {
   public readonly port = Number(process.env.PORT) || 8080;
   public readonly domain = process.env.NODE_ENV ? 'localhost' : process.env.PUBLIC_URL;
 
-  public get apiDomain() {
+  public get apiDomain(): string {
     switch (process.env.APP_ENV) {
       case 'test':
         return 'https://api-test.planbguild.eu';
@@ -16,7 +16,7 @@ class Config {
     }
   }
 
-  public get websiteDomain() {
+  public get websiteDomain(): string {
     switch (process.env.APP_ENV) {
       case 'test':
         return 'https://dev.planbguild.eu';
@@ -29,7 +29,7 @@ class Config {
     }
   }
 
-  public get cmsDomain() {
+  public get cmsDomain(): string {
     switch (process.env.APP_ENV) {
       case 'test':
         return 'https://cms-test.planbguild.eu';
@@ -42,13 +42,20 @@ class Config {
     }
   }
 
-  public readonly CORSWhitelist = [
-    'http://localhost:3000',
-    'https://dev.planbguild.eu',
-    'https://acc.planbguild.eu',
-    'https://planbguild.eu',
-    'https://www.planbguild.eu',
-  ];
+  public get CORSWhitelist(): string[] {
+    const whitelist = [
+      'https://dev.planbguild.eu',
+      'https://acc.planbguild.eu',
+      'https://planbguild.eu',
+      'https://www.planbguild.eu',
+    ];
+
+    if (process.env.APP_ENV === 'development') {
+      whitelist.push('http://localhost:3000');
+    }
+
+    return whitelist;
+  }
 
   public readonly battlenetApiUrl = 'https://eu.battle.net';
   public readonly blizzardApiUrl = 'https://eu.api.blizzard.com';

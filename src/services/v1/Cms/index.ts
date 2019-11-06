@@ -35,10 +35,11 @@ export default class CmsService {
 
       let relatedNews: i.NewsDetailpage[] = [];
 
+      // Get related news based on tags
       if ('tags' in data) {
         const newsDetailTagIds = data.tags!.map((tag) => tag.id);
 
-        // Get all posts with intersection tag IDs
+        // Get all posts with intersecting tag IDs
         relatedNews = allPosts.filter((post) => {
           if (!post.tags) return false;
           if (!post.published) return false;
@@ -73,5 +74,4 @@ export default class CmsService {
       delete data.meta.homepage;
     }
   }
-  /* eslint-enable */
 }

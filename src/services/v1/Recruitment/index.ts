@@ -1,11 +1,14 @@
 import * as i from 'types';
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
+import qs from 'qs';
+import {
+  Injectable, InternalServerErrorException, NotFoundException, BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import { TextChannel, RichEmbed } from 'discord.js';
-import { sortByDate, generateRandomString, env, ERROR_NUM } from 'helpers';
+import { generateRandomString, env, ERROR_NUM } from 'helpers';
 import discordBot from 'bot/Discord';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
@@ -13,6 +16,8 @@ import { PrimaryProfession } from './types/AddApplicationRequestBody';
 
 @Injectable()
 export default class RecruitmentService {
+  private readonly DELETED_TEXT = '[deleted]';
+
   constructor(
     @InjectRepository(entities.ApplicationMessage)
     private readonly applicationMessageRepo: Repository<entities.ApplicationMessage>,
@@ -24,19 +29,21 @@ export default class RecruitmentService {
     private readonly userRepo: Repository<entities.User>,
   ) {}
 
-  public applications = async (status: i.ApplicationStatus, type: i.ViewableType = 'private') => {
+  public applications = async (status: i.ApplicationStatus, query: i.PaginationQueries) => {
     try {
-      const res = await fetch(`${config.cmsDomain}/applications`);
-      const data: i.CmsApplicationResponse[] = await res.json();
-      const sort = sortByDate('desc');
+      const reqQueries = qs.stringify({
+        _sort: 'created_at:DESC',
+        _limit: query.limit || 10, // eslint-disable-line no-magic-numbers
+        _start: query.start || 0,
+        status,
+      });
 
-      const applications = data
-        // Filter out applications with requested status
-        .filter((app) => app.status === status)
-        // Sort by date, descending
-        .sort((a, b) => sort(a.created_at, b.created_at))
-        // Fix data response
-        .map(this.generateApplicationBody);
+      const res = await fetch(`${config.cmsDomain}/applications?${reqQueries}`);
+      const applications: i.CmsApplicationResponse[] = await res.json();
+
+      // Fetch all application UUIDs
+      /** @todo fetch only applications with given status (needs applications moved to DB) */
+      const applicationsUuids = await this.applicationUuidRepo.find();
 
       if (applications.length === 0) {
         return [];
@@ -46,14 +53,32 @@ export default class RecruitmentService {
       const comments = await this.applicationMessageRepo.find({
         where: {
           applicationId: In(applications.map((app) => app.id)),
-          public: Number(type === 'public'),
         },
       });
 
-      const response = applications.map((app) => ({
-        ...app,
-        commentsAmount: comments.filter((comment) => comment.applicationId === app.id).length,
-      }));
+      const response = applications
+        .filter((app) => applicationsUuids.find((appUuid) => appUuid.applicationId === app.id))
+        // Map UUID to application
+        .map((app) => {
+          const appUuid = applicationsUuids.find((appUuid) => appUuid.applicationId === app.id);
+          const uuid = appUuid && appUuid.uuid;
+
+          return {
+            ...app,
+            uuid,
+          };
+        })
+        // Fix data response
+        .map((app) => {
+          const appComments = comments.filter((comment) => comment.applicationId === app.id);
+
+          return this.generateApplicationBody(app, app.uuid!, {
+            comments: {
+              public: appComments.filter((comment) => comment.public).length,
+              private: appComments.filter((comment) => !comment.public).length,
+            },
+          });
+        });
 
       return response;
     } catch (err) {
@@ -61,32 +86,16 @@ export default class RecruitmentService {
     }
   }
 
-  public publicApplications = async (status: i.ApplicationStatus) => {
+  public singleApplication = async (uuid: string) => {
     try {
-      const applications = await this.applicationUuidRepo.find();
-      const cmsApplications = await this.applications(status, 'public');
+      const application = await this.getApplicationByUuid(uuid);
 
-      const response = cmsApplications
-        .filter((app) => applications.find((uuidApp) => uuidApp.applicationId === app.id))
-        .map((app) => ({
-          ...app,
-          public: applications.find((uuidApp) => uuidApp.applicationId === app.id),
-        }));
-
-      return response;
-    } catch (err) {
-      throw new InternalServerErrorException(null, err);
-    }
-  }
-
-  public singleApplication = async (id: number) => {
-    try {
-      const res = await fetch(`${config.cmsDomain}/applications/${id}`);
+      const res = await fetch(`${config.cmsDomain}/applications/${application.applicationId}`);
       const data: i.CmsApplicationResponse = await res.json();
 
       let votes: entities.ApplicationVote[] = await this.applicationVoteRepo.find({
         where: {
-          applicationId: id,
+          applicationId: application.applicationId,
         },
         relations: ['user'],
       });
@@ -96,71 +105,94 @@ export default class RecruitmentService {
         user: this.getPublicUser(vote.user),
       }));
 
-      const applicationBody = this.generateApplicationBody(data);
+      const applicationBody = this.generateApplicationBody(data, uuid);
 
       return {
         ...applicationBody,
         votes,
       };
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(null, err);
     }
   }
 
-  public singlePublicApplication = async (uuid: string) => {
-    try {
-      const application = await this.applicationUuidRepo.findOne({ where: { uuid } });
-      if (!application) {
-        throw new NotFoundException();
-      }
+  public getComments = async (uuid: string, type: i.CommentType) => {
+    const commentsTypeQuery: Record<string, number> = {};
 
-      const applicationDetail = await this.singleApplication(application.applicationId);
-
-      if (!applicationDetail) {
-        throw new NotFoundException();
-      }
-
-      delete applicationDetail.votes;
-
-      return applicationDetail;
-    } catch (err) {
-      throw new InternalServerErrorException(null, err);
-    }
-  }
-
-  public getComments = async (applicationId: number, type: i.ViewableType) => {
-    const messagesTypeQuery: Record<string, number> = {};
-
-    if (type !== 'all') {
-      messagesTypeQuery.public = Number(type === 'public');
-    }
+    // Get comment type
+    commentsTypeQuery.public = Number(type === 'public');
 
     try {
-      let messages = await this.applicationMessageRepo.find({
+      const application = await this.getApplicationByUuid(uuid);
+
+      let comments = await this.applicationMessageRepo.find({
         where: {
-          applicationId,
-          ...messagesTypeQuery,
+          applicationId: application.applicationId,
+          ...commentsTypeQuery,
         },
         order: {
           createdAt: 'DESC',
         },
       });
 
-      messages = messages.map((msg) => ({
-        ...msg,
-        user: this.getPublicUser(msg.user),
-      }));
+      comments = comments.map((comment) => {
+        let text = comment.text;
 
-      return messages;
+        // Deleted message
+        if (comment.deletedAt) {
+          text = this.DELETED_TEXT;
+          const user = this.getDeletedCommentUser(comment.user);
+
+          return {
+            ...comment,
+            text,
+            user,
+          };
+        }
+
+        // Normal message
+        return {
+          ...comment,
+          text,
+          user: this.getPublicUser(comment.user),
+        };
+      });
+
+      // Get comments count per type
+      /** @TODO don't return private count if not admin */
+      const count = {
+        public: 0,
+        private: 0,
+      };
+
+      const types: i.CommentType[] = type === 'public'
+        ? ['public', 'private']
+        : ['private', 'public'];
+
+      count[types[0]] = comments.length;
+      count[types[1]] = await this.applicationMessageRepo.count({
+        where: {
+          applicationId: application.applicationId,
+          public: types[0] === 'public' ? 0 : 1,
+        },
+      });
+
+      return {
+        messages: comments,
+        count,
+      };
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
   }
 
-  public addComment = async (applicationId: number, body: i.AddApplicationCommentBody) => {
+  public addComment = async (uuid: string, body: i.AddApplicationCommentBody) => {
     try {
+      const application = await this.getApplicationByUuid(uuid);
+
       const newComment = new entities.ApplicationMessage();
-      newComment.applicationId = applicationId;
+      newComment.applicationId = application.applicationId;
       newComment.text = body.comment;
       newComment.public = body.isPublic;
       newComment.user = await this.userRepo.findOneOrFail(body.userId);
@@ -178,12 +210,35 @@ export default class RecruitmentService {
     }
   }
 
-  public addApplicationVote = async (applicationId: number, body: i.AddApplicationVoteBody) => {
+  public deleteComment = async (id: number) => {
+    try {
+      const comment = await this.applicationMessageRepo.findOne(id);
+
+      if (!comment) {
+        throw new NotFoundException('No comment found with id');
+      }
+
+      comment.deletedAt = new Date();
+
+      // Upsert
+      const deletedComment = await this.applicationMessageRepo.save(comment);
+
+      deletedComment.text = this.DELETED_TEXT;
+      deletedComment.user = this.getDeletedCommentUser(deletedComment.user);
+
+      return deletedComment;
+    } catch (err) {
+      throw new InternalServerErrorException(null, err);
+    }
+  }
+
+  public addApplicationVote = async (uuid: string, body: i.AddApplicationVoteBody) => {
     try {
       const user = await this.userRepo.findOneOrFail(body.userId);
+      const application = await this.getApplicationByUuid(uuid);
 
       const newVote = new entities.ApplicationVote();
-      newVote.applicationId = applicationId;
+      newVote.applicationId = application.applicationId;
       newVote.vote = body.vote;
       newVote.user = user;
 
@@ -311,9 +366,10 @@ export default class RecruitmentService {
     }
   }
 
-  public updateApplicationStatus = async (applicationId: number, body: i.UpdateApplicationStatusBody) => {
+  public updateApplicationStatus = async (uuid: string, body: i.UpdateApplicationStatusBody) => {
     try {
-      const response = await fetch(`${config.cmsDomain}/applications/${applicationId}`, {
+      const application = await this.getApplicationByUuid(uuid);
+      const response = await fetch(`${config.cmsDomain}/applications/${application.applicationId}`, {
         method: 'PUT',
         body: JSON.stringify({
           status: body.status,
@@ -325,12 +381,33 @@ export default class RecruitmentService {
       });
       const updatedApplication: i.CmsApplicationResponse = await response.json();
 
-      return this.generateApplicationBody(updatedApplication);
+      return this.generateApplicationBody(updatedApplication, uuid);
     } catch (err) {
       throw new InternalServerErrorException(null, err);
     }
   }
 
+  private getApplicationByUuid = async (uuid: string): Promise<entities.ApplicationUuid> => {
+    const application = await this.applicationUuidRepo.findOne({ where: { uuid } });
+
+    if (!application) {
+      throw new NotFoundException('No application found with UUID');
+    }
+
+    return application;
+  }
+
+  private getDeletedCommentUser = (user: entities.User) => {
+    const delUser = this.getPublicUser({ ...user });
+
+    delUser.avatar = '';
+    delUser.username = this.DELETED_TEXT;
+    delUser.authLevel = 0;
+
+    delete delUser.id;
+
+    return delUser;
+  }
 
   private getPublicUser = (user: entities.User) => {
     const safeData: (keyof typeof user)[] = [
@@ -343,7 +420,7 @@ export default class RecruitmentService {
     return _.pick(user, safeData);
   }
 
-  private generateApplicationBody = (application: i.CmsApplicationResponse) => {
+  private generateApplicationBody = (application: i.CmsApplicationResponse, uuid: string, extraProps?: object) => {
     const getProfessionLevel = (id: number) => {
       const detail = application.applicationprofessions.find((proffDetail) => (
         proffDetail.profession === id
@@ -353,7 +430,7 @@ export default class RecruitmentService {
     };
 
     return {
-      id: application.id,
+      uuid,
       created_at: application.created_at,
       updated_at: application.updated_at,
       status: application.status,
@@ -392,6 +469,7 @@ export default class RecruitmentService {
         reason: application.reason,
       },
       social: application.social,
+      ...extraProps,
     };
   }
 }

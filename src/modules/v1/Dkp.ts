@@ -7,6 +7,7 @@ import DkpController from 'controllers/v1/Dkp';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      entities.DkpEvent,
       entities.DkpHistory,
       entities.Character,
     ]),

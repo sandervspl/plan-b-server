@@ -29,6 +29,10 @@ export default class AuthController {
   /** Return user data from requesting user */
   @Get('/me')
   private async me(@Req() req: Request, @Res() res: Response) {
+    if (!req.user || !req.session || !req.session.passport) {
+      return res.json({});
+    }
+
     await this.authService.me(req, res);
   }
 }

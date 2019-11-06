@@ -10,7 +10,10 @@ class DiscordConfig {
 
   public readonly adminIds = [
     '561717969005183018', // Guild Officer
+    '622436428177080366', // Class Leader
   ];
+
+  public readonly guildLeaderId = '602127893883256862';
 }
 
 const discordConfig = new DiscordConfig();

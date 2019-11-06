@@ -1,5 +1,4 @@
 import * as i from 'types';
-import { Request } from 'express';
 import {
   Injectable, InternalServerErrorException, NotFoundException, BadRequestException,
 } from '@nestjs/common';
@@ -35,13 +34,13 @@ export default class UserService {
 
   // Create user
   public create = async (user: i.CreateUserBody) => {
-    const newUser = new entities.User();
-    newUser.id = user.id;
-    newUser.authLevel = user.authLevel;
-    newUser.username = user.username;
-    newUser.avatar = user.avatar;
-
     try {
+      const newUser = new entities.User();
+      newUser.id = user.id;
+      newUser.authLevel = user.authLevel;
+      newUser.username = user.username;
+      newUser.avatar = user.avatar;
+
       await this.userRepo.save(newUser);
 
       return newUser;
@@ -54,7 +53,7 @@ export default class UserService {
     try {
       const character = await this.characterRepo.findOneOrFail({
         where: {
-          name: body.characterName,
+          name: body.characterName.toLowerCase(),
         },
       });
 
@@ -73,7 +72,7 @@ export default class UserService {
   public createCharacter = async (body: i.CreateCharacterBody) => {
     try {
       const character = new entities.Character();
-      character.name = body.characterName;
+      character.name = body.characterName.toLowerCase();
 
       const newCharacter = await this.characterRepo.save(character);
 
@@ -89,15 +88,15 @@ export default class UserService {
 
   public singleCharacter = async (user: i.AugmentedUser) => {
     try {
-      const dbUser = await this.userRepo.findOneOrFail(user.id);
-      const character = await this.characterRepo.findOneOrFail({
-        where: {
-          user: dbUser,
-        },
-        relations: ['dkpHistories'],
+      const dbUser = await this.userRepo.findOneOrFail(user.id, {
+        relations: ['character', 'character.dkpHistories', 'character.dkpHistories.event'],
       });
 
-      return character;
+      if (!dbUser.character) {
+        throw new NotFoundException('No character found for user');
+      }
+
+      return dbUser.character;
     } catch (err) {
       throw new InternalServerErrorException('Error retrieving character', err);
     }

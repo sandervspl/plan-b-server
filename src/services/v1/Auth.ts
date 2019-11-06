@@ -22,11 +22,23 @@ export default class AuthService {
     private readonly userService: UserService,
   ) {
     discordBot.client.on('ready', () => {
+      console.log('Discord bot client ready in AuthService.');
+
       this.guild = discordBot.client.guilds.get(secretConfig.discord.planBServerId);
+
+      console.log('guild:', !!this.guild);
     });
   }
 
   public auth: ExpressParamsFn = (req, res, next) => {
+    if (!this.guild) {
+      console.log('Server had no guild registered, trying again.');
+
+      this.guild = discordBot.client.guilds.get(secretConfig.discord.planBServerId);
+
+      console.log('guild:', !!this.guild);
+    }
+
     const fn = passport.authenticate('discord', {
       scope: discordConfig.scopes,
       failureRedirect: this.failRedirect(),
@@ -43,11 +55,15 @@ export default class AuthService {
       { failureRedirect: this.failRedirect('discord') },
       (err, user?: i.UserData) => {
         if (err) {
+          console.error('AUTH:', 'Passport auth error.', err);
           return next(err);
         }
 
         // Only guild members are allowed to sign in
         if (!user || !this.getGuildMember(user.id)) {
+          console.error('AUTH:', 'No user found or user is not part of the guild');
+          console.error('user:', user);
+
           return res
             .status(RESPONSE_CODE.UNAUTHORIZED)
             .redirect(this.failRedirect('auth'));
@@ -56,12 +72,14 @@ export default class AuthService {
         // Save user to session under "req.user"
         req.login(user, async (err) => {
           if (err) {
+            console.error('AUTH:', 'request login error.', err);
+
             res
               .status(RESPONSE_CODE.INTERNAL_SERVER_ERR)
               .redirect(this.failRedirect('server'));
           } else {
             try {
-              // Create/update user
+              // Upsert user
               await this.userService.create({
                 id: user.id,
                 username: this.getGuildMember(user.id)!.displayName,
@@ -69,9 +87,14 @@ export default class AuthService {
                 authLevel: this.getAuthLevel(user.id),
               });
 
+              // Save refresh token in session
+              req.user.refreshToken = user.refreshToken;
+
               // Redirect to website
               res.redirect(websiteDomain);
             } catch (err) {
+              console.error('AUTH:', 'User update error.', err);
+
               return res
                 .status(RESPONSE_CODE.INTERNAL_SERVER_ERR)
                 .redirect(this.failRedirect('server'));
@@ -93,10 +116,7 @@ export default class AuthService {
     const user = req.user as i.AugmentedUser | undefined;
 
     if (!user) {
-      // @TODO this throws frontend in an infinite /me request loop
-      // return res
-      //   .status(RESPONSE_CODE.UNAUTHORIZED)
-      //   .redirect(this.failRedirect('auth'));
+      console.error('No user found');
 
       throw new UnauthorizedException();
     }
@@ -106,6 +126,8 @@ export default class AuthService {
 
     // Only guild members are allowed to sign in
     if (!guildMember) {
+      console.error('No guild member found for user');
+
       return res
         .status(RESPONSE_CODE.UNAUTHORIZED)
         .redirect(this.failRedirect('auth'));
@@ -158,6 +180,13 @@ export default class AuthService {
     return _.pick(user, safeData);
   }
 
+
+  private userIsGuildMaster = (memberId: string): boolean => {
+    const user = this.getGuildMember(memberId);
+
+    return !!user && !!user.roles.get(discordConfig.guildLeaderId);
+  }
+
   private userIsAdmin = (memberId: string): boolean => {
     const user = this.getGuildMember(memberId);
 
@@ -175,6 +204,10 @@ export default class AuthService {
   }
 
   private getAuthLevel = (memberId: string): i.AUTH_LEVEL => {
+    if (this.userIsGuildMaster(memberId)) {
+      return i.AUTH_LEVEL.GUILD_MASTER;
+    }
+
     if (this.userIsAdmin(memberId)) {
       return i.AUTH_LEVEL.OFFICER;
     }

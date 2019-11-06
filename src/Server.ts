@@ -13,14 +13,7 @@ import ApplicationModule from 'modules/v1/Api';
 
 const isProd = process.env.NODE_ENV === 'production';
 
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
-
-passport.use(new DiscordStrategy(
+const discordStrategy = new DiscordStrategy(
   {
     clientID: secretConfig.discord.publicKey,
     clientSecret: secretConfig.discord.privateKey,
@@ -32,10 +25,16 @@ passport.use(new DiscordStrategy(
       return done(null, user);
     });
   }
-));
+);
 
-/** @todo Refresh oauth token */
-// refresh.use(discordStrategy);
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.use(discordStrategy);
 
 async function bootstrap() {
   const app = await NestFactory.create(ApplicationModule);
@@ -64,6 +63,9 @@ async function bootstrap() {
   // @ts-ignore this works
   const MysqlStore = mysqlSession(session);
 
+  const maxCookieAge = new Date();
+  maxCookieAge.setFullYear(maxCookieAge.getFullYear() + 1);
+
   const sessionCfg: SessionOptions = {
     secret: secretConfig.sessionSecret,
     name: 'plan-b-auth',
@@ -72,6 +74,7 @@ async function bootstrap() {
     proxy: isProd,
     cookie: {
       secure: isProd,
+      maxAge: maxCookieAge.getTime(),
     },
     store: new MysqlStore(secretConfig.databaseInfo),
   };
@@ -82,7 +85,7 @@ async function bootstrap() {
 
   await app.listen(apiConfig.port, () => {
     console.info(
-      `[${process.env.NODE_ENV} / ${process.env.APP_ENV}] Server started on port ${apiConfig.port}`
+      `[${process.env.NODE_ENV} / ${process.env.APP_ENV}] Server started on port ${apiConfig.port} at ${apiConfig.apiDomain}`
     );
   });
 }

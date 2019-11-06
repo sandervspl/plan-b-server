@@ -5,7 +5,7 @@ import { Request } from 'express';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
-  canActivate(context: ExecutionContext,): boolean | Promise<boolean> | Observable<boolean> {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
 
     if (!req.session || req.session.authLevel < i.AUTH_LEVEL.OFFICER) {

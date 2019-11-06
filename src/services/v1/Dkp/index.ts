@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException, BadRequestException } from '@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import convert from 'xml-js';
+import _ from 'lodash';
 import { ERROR_NUM } from 'helpers';
 import * as entities from 'entities';
 import * as DkpTypes from 'services/v1/Dkp/types';
@@ -12,6 +13,8 @@ export default class DkpService {
   constructor(
     @InjectRepository(entities.DkpHistory)
     private readonly DkpHistoryRepo: Repository<entities.DkpHistory>,
+    @InjectRepository(entities.DkpEvent)
+    private readonly DkpEventRepo: Repository<entities.DkpEvent>,
     @InjectRepository(entities.Character)
     private readonly CharacterRepo: Repository<entities.Character>,
   ) {}
@@ -26,20 +29,53 @@ export default class DkpService {
 
       // Extract data as readable variabes
       const [raidData] = result.elements;
-      const players = raidData.elements;
+      const players = raidData.elements.map((element) => ({
+        ...element,
+        attributes: {
+          ...element.attributes,
+          playername: element.attributes.playername.split('-')[0], // Remove server from name
+        },
+      }));
+
+      // Create and upsert dkp event
+      const dkpEvent = new entities.DkpEvent();
+      dkpEvent.name = name;
+      dkpEvent.exporter = raidData.attributes.exporter;
+      dkpEvent.time = Number(raidData.attributes.time);
+
+      await this.DkpEventRepo.save(dkpEvent);
 
       // Look up character entries from names in XML
-      const playerNames = players.map(({ attributes: player }) => player.playername);
+      const playerNames = players.map(({ attributes: player }) => player.playername.toLowerCase());
+
       const characters = await this.CharacterRepo.find({
         where: In(playerNames),
       });
 
+      // Check for missing characters
+      const characterNames = characters.map((character) => character.name.toLowerCase());
+      const diffCharacters = _.difference(playerNames, characterNames);
+
+      // Create new batch of characters
+      const newCharacters = diffCharacters.map((name) => {
+        const character = new entities.Character();
+        character.name = name;
+
+        return character;
+      });
+
+      // Batch upsert new characters
+      await this.CharacterRepo.save(newCharacters);
+
       // Generate new Dkp History entries + character's raid data
-      const entries = characters
+      const allCharacters = await this.CharacterRepo.find();
+
+      const entries = allCharacters
         .map((character) => {
           const dkpEntry = new entities.DkpHistory();
+
           const data = players.find(({ attributes: player }) => (
-            player.playername === character.name
+            player.playername.toLowerCase() === character.name.toLowerCase()
           ));
 
           if (!data) {
@@ -53,9 +89,7 @@ export default class DkpService {
           dkpEntry.spent = Number(characterRaidData.spent);
           dkpEntry.total = Number(characterRaidData.total);
           dkpEntry.hours = Number(characterRaidData.hours);
-          dkpEntry.exporter = raidData.attributes.exporter;
-          dkpEntry.exportTime = Number(raidData.attributes.time);
-          dkpEntry.event = name;
+          dkpEntry.event = dkpEvent;
 
           return [dkpEntry, characterRaidData] as const;
         })
@@ -67,9 +101,9 @@ export default class DkpService {
       // Save new entries to DB
       await this.DkpHistoryRepo.save(dkpEntries);
 
-      // Update character entries with new total DKP
+      // Update character entries with current DKP
       const updates = characterData.map((data) => {
-        const dkp = Number(data.total);
+        const dkp = Number(data.net);
 
         return new Promise((res) => (
           this.CharacterRepo.update({ name: data.playername }, { dkp }).then(res)
@@ -79,6 +113,8 @@ export default class DkpService {
 
       return {};
     } catch (err) {
+      console.error(err);
+
       if (err && err.errno === ERROR_NUM.DUPLICATE_ENTRY) {
         throw new BadRequestException('Export already submitted.');
       }
@@ -90,20 +126,20 @@ export default class DkpService {
   public getAverageGuildDkp = async () => {
     // Get all characters
     const characters = await this.CharacterRepo.find({
-      relations: ['dkpHistories'],
+      relations: ['dkpHistories', 'dkpHistories.event'],
     });
 
-    // Get total DKP by export times
+    // Get total current DKP by export times
     const totals = characters.reduce((prev, character) => {
       character.dkpHistories.forEach((entry) => {
         prev = {
           ...prev,
-          [entry.exportTime]: {
-            ...prev[entry.exportTime],
-            dkp: prev[entry.exportTime]
-              ? prev[entry.exportTime].dkp + entry.total
-              : entry.total,
-            count: prev[entry.exportTime] ? prev[entry.exportTime].count + 1 : 1,
+          [entry.event.time]: {
+            ...prev[entry.event.time],
+            dkp: prev[entry.event.time]
+              ? prev[entry.event.time].dkp + entry.net
+              : entry.net,
+            count: prev[entry.event.time] ? prev[entry.event.time].count + 1 : 1,
             date: entry.createdAt,
           },
         };

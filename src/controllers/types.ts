@@ -1,5 +1,10 @@
-export { ViewableType } from './v1/Recruitment/types';
+export { CommentType } from './v1/Recruitment/types';
 export * from './v1/User/types';
+
+export type PaginationQueries = {
+  limit?: number;
+  start?: number;
+}
 
 export type UserData = {
   username: string;
@@ -11,6 +16,7 @@ export type UserData = {
   id: string;
   provider: string;
   accessToken: string;
+  refreshToken: string;
   fetchedAt: Date;
 }
 

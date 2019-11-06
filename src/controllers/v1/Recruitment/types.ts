@@ -1,23 +1,23 @@
 import * as i from 'types';
 
-export type ViewableType = 'private' | 'public' | 'all';
+export type CommentType = 'private' | 'public';
 
 export type ApplicationsParam = {
   status: i.ApplicationStatus;
 }
 
 export type ApplicationMessagesParam = {
-  id: number;
+  uuid: string;
 }
 
 export type ApplicationMessagesQuery = {
-  type: i.ViewableType;
+  type: i.CommentType;
 }
 
 export type SingleApplicationParam = {
-  id: number;
+  uuid: string;
 }
 
-export type SinglePublicApplicationParam = {
-  uuid: string;
+export type DeleteCommentParam = {
+  id: number;
 }

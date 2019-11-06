@@ -1,11 +1,10 @@
 import {
-  Entity, CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn, Column, Unique, ManyToOne,
+  Entity, CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn, Column, ManyToOne,
 } from 'typeorm';
-import { Character } from 'entities';
+import { Character, DkpEvent } from 'entities';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 @Entity()
-@Unique(['character', 'exportTime'])
 class DkpHistory {
   @PrimaryGeneratedColumn({
     type: 'int',
@@ -38,20 +37,8 @@ class DkpHistory {
   })
   hours!: number;
 
-  @Column({
-    type: 'varchar',
-  })
-  exporter!: string;
-
-  @Column({
-    type: 'int',
-  })
-  exportTime!: number;
-
-  @Column({
-    type: 'varchar',
-  })
-  event!: string;
+  @ManyToOne((type) => DkpEvent, (dkpEvent) => dkpEvent.dkpHistory)
+  event!: DkpEvent;
 
   @CreateDateColumn()
   createdAt!: Date;

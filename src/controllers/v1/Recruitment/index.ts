@@ -1,10 +1,13 @@
 import * as i from 'types';
-import { Controller, Get, Post, Put, UseGuards, Param, Body, Query } from '@nestjs/common';
-import RecruitmentService from 'services/v1/Recruitment';
-import { AdminGuard } from 'guards/auth';
 import {
-  ApplicationsParam, SingleApplicationParam, SinglePublicApplicationParam, ApplicationMessagesParam,
-  ApplicationMessagesQuery,
+  Controller, Get, Post, Put, UseGuards, Param, Body, Query, Req, UnauthorizedException, Delete,
+} from '@nestjs/common';
+import { Request } from 'express';
+import RecruitmentService from 'services/v1/Recruitment';
+import { UserGuard, AdminGuard } from 'guards';
+import {
+  ApplicationsParam, SingleApplicationParam, ApplicationMessagesParam, ApplicationMessagesQuery,
+  DeleteCommentParam,
 } from './types';
 
 @Controller('recruitment')
@@ -14,14 +17,12 @@ export default class RecruitmentController {
   ) {}
 
   @Get('/applications/:status')
-  @UseGuards(AdminGuard)
-  private async applications(@Param() param: ApplicationsParam) {
-    return this.recruitmentService.applications(param.status);
-  }
-
-  @Get('/applications/public/:status')
-  private async publicApplications(@Param() param: ApplicationsParam) {
-    return this.recruitmentService.publicApplications(param.status);
+  @UseGuards(UserGuard)
+  private async applications(
+    @Param() param: ApplicationsParam,
+    @Query() query: i.PaginationQueries
+  ) {
+    return this.recruitmentService.applications(param.status, query);
   }
 
   @Post('/application')
@@ -29,46 +30,52 @@ export default class RecruitmentController {
     return this.recruitmentService.addApplication(body);
   }
 
-  @Get('/application/:id')
-  @UseGuards(AdminGuard)
+  @Get('/application/:uuid')
   private async singleApplication(@Param() param: SingleApplicationParam) {
-    return this.recruitmentService.singleApplication(param.id);
-  }
-
-  @Get('/application/public/:uuid')
-  private async singlePublicApplication(@Param() param: SinglePublicApplicationParam) {
-    return this.recruitmentService.singlePublicApplication(param.uuid);
+    return this.recruitmentService.singleApplication(param.uuid);
   }
 
   // @TODO test if possible to see officer messages without Auth
-  @Get('/application/:id/messages')
+  @Get('/application/:uuid/comments')
   private async getComments(
-    @Param() param: ApplicationMessagesParam, @Query() query: ApplicationMessagesQuery
+    @Req() req: Request,
+    @Param() param: ApplicationMessagesParam,
+    @Query() query: ApplicationMessagesQuery
   ) {
-    return this.recruitmentService.getComments(param.id, query.type);
+    if (query.type === 'private' && req.isAuthenticated()) {
+      throw new UnauthorizedException();
+    }
+
+    return this.recruitmentService.getComments(param.uuid, query.type);
   }
 
-  @Post('/application/:id/comment')
-  @UseGuards(AdminGuard)
+  @Post('/application/:uuid/comment')
+  @UseGuards(UserGuard)
   private async addApplicationComment(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationCommentBody
   ) {
-    return this.recruitmentService.addComment(param.id, body);
+    return this.recruitmentService.addComment(param.uuid, body);
   }
 
-  @Post('/application/:id/vote')
+  @Delete('/application/comment/:id')
+  @UseGuards(UserGuard)
+  private async deleteApplicationComment(@Param() param: DeleteCommentParam) {
+    return this.recruitmentService.deleteComment(param.id);
+  }
+
+  @Post('/application/:uuid/vote')
   @UseGuards(AdminGuard)
   private async addApplicationVote(
     @Param() param: SingleApplicationParam, @Body() body: i.AddApplicationVoteBody
   ) {
-    return this.recruitmentService.addApplicationVote(param.id, body);
+    return this.recruitmentService.addApplicationVote(param.uuid, body);
   }
 
-  @Put('/application/:id/status')
+  @Put('/application/:uuid/status')
   @UseGuards(AdminGuard)
   private async updateApplicationStatus(
     @Param() param: SingleApplicationParam, @Body() body: i.UpdateApplicationStatusBody
   ) {
-    return this.recruitmentService.updateApplicationStatus(param.id, body);
+    return this.recruitmentService.updateApplicationStatus(param.uuid, body);
   }
 }
