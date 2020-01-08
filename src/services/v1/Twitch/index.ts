@@ -7,6 +7,7 @@ import _ from 'lodash';
 import * as entities from 'entities';
 import config from 'config/apiconfig';
 import secret from 'config/secret';
+import DiscordBot from 'Bot/Discord';
 
 @Injectable()
 export default class TwitchService {
@@ -94,4 +95,6 @@ export default class TwitchService {
       throw new InternalServerErrorException('Error while fetching streamers', JSON.stringify(err));
     }
   }
+
+  public streamChanged = async (body: any) => {}
 }
