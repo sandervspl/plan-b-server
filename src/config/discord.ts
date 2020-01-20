@@ -14,6 +14,8 @@ class DiscordConfig {
   ];
 
   public readonly guildLeaderId = '602127893883256862';
+
+  public readonly discordTestChannelId = '668943349306097724';
 }
 
 const discordConfig = new DiscordConfig();
