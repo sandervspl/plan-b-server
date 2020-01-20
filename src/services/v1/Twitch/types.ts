@@ -32,3 +32,17 @@ export type TwitchUser = {
   offline_image_url: string;
   view_count: number;
 }
+
+export type GameData = {
+  data: {
+    id: string;
+    name: string;
+    box_art_url: string;
+  }[];
+}
+
+export type TwitchToken = {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+}
