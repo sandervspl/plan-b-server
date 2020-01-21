@@ -87,6 +87,11 @@ export default class TwitchService {
   }
 
   public streamChanged = async (body: i.StreamChangeBody) => {
+    // REMOVE IF TESTING
+    if (!env.isProduction) {
+      return;
+    }
+
     const stream = body.data[0];
 
     // Stream went offline
@@ -155,7 +160,7 @@ export default class TwitchService {
       // Add subscription for every streamer in DB
       streamers.forEach((streamer) => {
         const body = {
-          'hub.callback': 'https://api-acc.planbguild.eu/twitch/stream_changed',
+          'hub.callback': 'https://api.planbguild.eu/twitch/stream_changed',
           'hub.mode': 'subscribe',
           'hub.topic': `https://api.twitch.tv/helix/streams?user_id=${streamer.id}`,
           'hub.lease_seconds': 864000,
