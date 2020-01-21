@@ -121,7 +121,7 @@ export default class TwitchService {
 
     const embed = new RichEmbed()
       .setColor('#9146FF')
-      .setAuthor('Twitch Live notification', 'https://cms.planbguild.eu/uploads/9544d3d051424d0b996f6325151cb3a3.png')
+      .setAuthor('Twitch live notification', 'https://cms.planbguild.eu/uploads/9544d3d051424d0b996f6325151cb3a3.png')
       .setThumbnail(this.replaceTemplateDimensions(userData.profile_image_url, 80, 80)) // eslint-disable-line
       .setTitle(`${stream.user_name} is now live!`)
       .setURL(`https://www.twitch.tv/${stream.user_name}`)
