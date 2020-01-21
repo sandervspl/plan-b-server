@@ -115,7 +115,7 @@ export default class TwitchService {
 
     // Get discord channel to post in
     const channelId = env.isProduction
-      ? '607289262672707596'                // plan-b classic media - videos
+      ? '669210316910886932'                // plan-b classic media - livestreams
       : discordConfig.discordTestChannelId; // plan-b testing
     const channel = discordBot.client.channels.get(channelId) as TextChannel;
 
