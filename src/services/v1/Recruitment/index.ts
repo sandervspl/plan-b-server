@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { TextChannel, RichEmbed } from 'discord.js';
 import { generateRandomString, env, ERROR_NUM } from 'helpers';
 import discordBot from 'bot/Discord';
+import discordConfig from 'config/discord';
 import config from 'config/apiconfig';
 import * as entities from 'entities';
 import { PrimaryProfession } from './types/AddApplicationRequestBody';
@@ -340,7 +341,7 @@ export default class RecruitmentService {
       // Create Discord message about this application
       const channelId = env.isProduction
         ? '612749365978726427'  // plan-b applications
-        : '561859968681115658'; // plan-b testing
+        : discordConfig.discordTestChannelId; // plan-b testing
       const channel = discordBot.client.channels.get(channelId) as TextChannel;
 
       if (channel) {

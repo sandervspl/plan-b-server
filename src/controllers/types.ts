@@ -33,3 +33,26 @@ export type MeResponse = {
   authLevel: number;
   dkp: number;
 }
+
+export type StreamChangeResponse = {
+  'hub.challenge': string;
+  'hub.lease_seconds': string;
+  'hub.mode': string;
+  'hub.topic': string;
+}
+
+export type StreamChangeBody = {
+  data: {
+    id: string;
+    user_id: string;
+    user_name: string;
+    game_id: string;
+    community_ids: any[];
+    type: string;
+    title: string;
+    viewer_count: number;
+    started_at: Date;
+    language: string;
+    thumbnail_url: string;
+  }[];
+}
